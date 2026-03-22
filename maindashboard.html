@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FridgeWise - Digital Kitchen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        body { background-color: #f0fff4; }
+
+        .meal-card {
+            background-color: #f0fff4;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .meal-card:hover {
+            background-color: #e2fce8;
+            transform: translateY(-2px);
+        }
+
+        .typing::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .hidden { display: none; }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        .accordion-content.open {
+            max-height: 1000px;
+            padding-bottom: 1.5rem;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-down { animation: fadeInDown 0.5s ease-out forwards; }
+
+        .category-box {
+            background-color: white;
+            border: 2px solid #dcfce7;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: border-color 0.2s ease;
+        }
+        .category-box:hover { border-color: #86efac; }
+
+        /* Bullet List Styling for AI Responses */
+        .ai-bullet-list {
+            list-style-type: disc;
+            margin-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+        .ai-bullet-list li { margin-bottom: 0.5rem; font-style: italic; color: #374151; }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-900 overflow-x-hidden">
+
+    <div id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out z-[60]">
+        <div class="p-8">
+            <div class="flex items-center justify-between mb-10">
+                <h2 class="text-2xl font-bold text-green-800">FridgeWise</h2>
+                <button id="sidebarClose" class="text-gray-400 hover:text-red-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <nav class="space-y-4">
+                <a href="cookinghistory.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Cooking History
+                </a>
+                <a href="favoritemeal.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> Favorite Recipes
+                </a>
+            </nav>
+        </div>
+    </div>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
+
+    <div id="mainDashboard" class="flex flex-col min-h-screen">
+        <header class="bg-[#dcfce7] border-b border-green-200 shadow-sm sticky top-0 z-50">
+            <nav class="max-w-[1440px] mx-auto px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center">
+                    <button id="sidebarToggle" class="text-gray-600 hover:text-gray-900 p-2"><svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+                    <div class="h-8 border-l border-green-300 mx-4"></div>
+                    <h1 class="text-2xl font-extrabold tracking-tighter text-[#065f46]">DIGITAL KITCHEN</h1>
+                </div>
+                <div class="text-sm font-medium text-gray-600">Chef Salty</div>
+            </nav>
+        </header>
+
+        <main class="flex-grow flex items-center justify-center py-12 px-6">
+            <div class="w-full max-w-[1200px] grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-800 uppercase">Ingredients</h2>
+                    <div class="bg-white border border-gray-300 rounded-xl h-[400px] shadow-sm flex flex-col overflow-hidden">
+                        <ul id="ingList" class="flex-grow p-5 space-y-3 overflow-y-auto"></ul>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex gap-2">
+                            <input type="text" id="ingInput" onkeydown="handleKey(event)" placeholder="Add ingredients..." class="flex-1 border border-gray-400 p-4 rounded-lg outline-none focus:border-blue-500">
+                            <button onclick="addIng()" class="bg-[#065f46] text-white px-6 rounded-lg hover:bg-green-800 transition-colors">+</button>
+                        </div>
+                        <button id="cookBtn" class="w-full bg-[#2b87da] text-white font-bold py-4 uppercase tracking-widest hover:bg-blue-600 shadow-lg rounded-lg">START COOKING</button>
+                    </div>
+                </div>
+                <div id="resultsArea" class="space-y-6 opacity-0 pointer-events-none transition-opacity duration-500">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-800 uppercase">Possible Meals</h2>
+                    <div id="mealsContainer" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="mealOverview" class="hidden flex flex-col min-h-screen">
+        <header class="bg-[#dcfce7] border-b border-green-200 shadow-sm sticky top-0 z-50">
+            <nav class="max-w-[1440px] mx-auto px-6 py-3 flex items-center justify-between">
+                <button onclick="backToDashboard()" class="text-[#065f46] font-bold flex items-center"><svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg> BACK</button>
+                <h1 class="text-2xl font-extrabold tracking-tighter text-[#065f46]">DIGITAL KITCHEN</h1>
+                <div class="w-10"></div>
+            </nav>
+        </header>
+
+        <main class="flex-grow max-w-[1200px] mx-auto py-12 px-6 w-full">
+            <div class="flex items-center space-x-4 mb-8">
+                <h2 class="text-4xl font-bold uppercase tracking-tight">Meal Overview</h2>
+                <button id="favBtn" onclick="toggleFavorite()" class="flex items-center hover:scale-105 transition-transform group">
+                    <span id="favStar" class="text-3xl transition-colors text-gray-400">☆</span>
+                    <span id="favText" class="text-sm font-bold text-gray-600 ml-2">(Mark as favorite)</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-white border-4 border-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center">
+                        <img id="overviewImg" src="" class="w-full h-full object-cover hidden" alt="Meal Visual">
+                        <div id="imageLoader" class="text-gray-400 font-bold uppercase tracking-widest text-xs text-center p-4">Generating Visual...</div>
+                    </div>
+                    <p id="viewMealName" class="mt-4 text-xl font-bold uppercase tracking-widest text-gray-800"></p>
+                </div>
+                <div class="p-2">
+                    <p id="mealDesc" class="text-gray-700 font-medium leading-relaxed italic"></p>
+                </div>
+                <div class="space-y-4" id="accordionGroup">
+                    <div class="category-box">
+                        <button onclick="toggleAccordion(this, 'Ingredients')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Ingredients <span>+</span></button>
+                        <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                    </div>
+                    <div class="category-box">
+                        <button onclick="toggleAccordion(this, 'Nutritional Facts')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Nutritional Facts <span>+</span></button>
+                        <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                    </div>
+                    <div class="category-box">
+                        <button onclick="toggleAccordion(this, 'Step by Step Process')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Step by Step Process <span>+</span></button>
+                        <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                    </div>
+                    <div class="category-box">
+                        <button onclick="toggleAccordion(this, 'Nutritional Analysis')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Nutritional Analysis <span>+</span></button>
+                        <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                    </div>
+                    <div class="category-box">
+                        <button onclick="toggleAccordion(this, 'Add-ons Suggestion')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Add-ons Suggestion <span>+</span></button>
+                        <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- GLOBALS ---
+        let ingredients = [];
+        const API_KEY = "AIzaSyBmIKs5olIjXLNl3YYTfI2vPRXyY0gmx7U";
+        let currentMealName = "";
+
+        // --- UI HELPERS ---
+        function setStarState(isFav) {
+            const star = document.getElementById('favStar');
+            const text = document.getElementById('favText');
+            if (isFav) {
+                star.innerText = "★"; star.classList.add('text-yellow-400'); star.classList.remove('text-gray-400');
+                text.innerText = "(Favorited)";
+            } else {
+                star.innerText = "☆"; star.classList.remove('text-yellow-400'); star.classList.add('text-gray-400');
+                text.innerText = "(Mark as favorite)";
+            }
+        }
+
+        // --- DASHBOARD LOGIC ---
+        function addIng() {
+            const input = document.getElementById('ingInput');
+            if (input.value.trim()) { ingredients.push(input.value.trim()); input.value = ''; renderList(); }
+        }
+        function handleKey(e) { if (e.key === "Enter") addIng(); }
+        function renderList() {
+            document.getElementById('ingList').innerHTML = ingredients.map((ing, i) => `
+                <li class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <span class="font-medium text-gray-700">${ing}</span>
+                    <button onclick="ingredients.splice(${i},1);renderList()" class="text-red-400 font-bold">✕</button>
+                </li>`).join('');
+        }
+
+        // --- MEAL OVERVIEW LOGIC ---
+        async function openMealOverview(name) {
+            currentMealName = name;
+            document.getElementById('mainDashboard').classList.add('hidden');
+            document.getElementById('mealOverview').classList.remove('hidden');
+            document.getElementById('viewMealName').innerText = name;
+            
+            // Check Firebase
+            const mealId = name.replace(/[.#$/[\]]/g, "_");
+            database.ref('favorites/' + mealId).once('value', s => setStarState(s.exists()));
+
+            // Reset UI components
+            document.querySelectorAll('.accordion-content').forEach(el => { el.classList.remove('open'); el.innerHTML = ""; });
+            document.querySelectorAll('#accordionGroup span').forEach(s => s.innerText = "+");
+
+            // Image
+            const img = document.getElementById('overviewImg');
+            const loader = document.getElementById('imageLoader');
+            img.classList.add('hidden'); loader.classList.remove('hidden');
+            img.src = `https://loremflickr.com/600/600/${encodeURIComponent(name)},dish,food/all?lock=${Math.floor(Math.random()*1000)}`;
+            img.onload = () => { img.classList.remove('hidden'); loader.classList.add('hidden'); };
+
+            // Desc
+            const descEl = document.getElementById('mealDesc');
+            descEl.innerText = "";
+            const res = await callAI(`Give a short, appetizing 2-sentence Filipino description for ${name}.`);
+            typeWriter(res, descEl);
+        }
+
+        function toggleFavorite() {
+            if (!currentMealName) return;
+            const mealId = currentMealName.replace(/[.#$/[\]]/g, "_");
+            const favRef = database.ref('favorites/' + mealId);
+
+            favRef.once('value', snapshot => {
+                if (snapshot.exists()) {
+                    favRef.remove().then(() => setStarState(false));
+                } else {
+                    favRef.set({ name: currentMealName, savedAt: Date.now() }).then(() => setStarState(true));
+                }
+            });
+        }
+
+        async function toggleAccordion(btn, type) {
+            const content = btn.nextElementSibling;
+            const span = btn.querySelector('span');
+
+            if (content.classList.contains('open')) {
+                content.classList.remove('open'); span.innerText = "+";
+            } else {
+                content.innerHTML = "<p class='py-4 italic text-gray-400 text-center'>Consulting the chef...</p>";
+                content.classList.add('open'); span.innerText = "-";
+                
+                const prompt = `Provide ${type} for "${currentMealName}". If there are multiple items, list them as bullets. Keep it concise.`;
+                const aiRes = await callAI(prompt);
+                
+                content.innerHTML = ""; 
+                const list = document.createElement('ul');
+                list.className = "ai-bullet-list typing";
+                content.appendChild(list);
+
+                const items = aiRes.split(/\n/).filter(l => l.trim().length > 0).map(l => l.replace(/^(\d+\.|\*|-)\s+/, ""));
+                typeWriterList(items, list);
+            }
+        }
+
+        // --- UTILS ---
+        async function callAI(text) {
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+                });
+                const data = await res.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch { return "Error loading content."; }
+        }
+
+        function typeWriter(text, element, speed = 15) {
+            let i = 0; element.classList.add('typing');
+            (function type() {
+                if (i < text.length) { element.innerHTML += text.charAt(i); i++; setTimeout(type, speed); }
+                else { element.classList.remove('typing'); }
+            })();
+        }
+
+        function typeWriterList(items, container, speed = 10) {
+            let itemIdx = 0;
+            (function nextItem() {
+                if (itemIdx < items.length) {
+                    const li = document.createElement('li');
+                    container.appendChild(li);
+                    let charIdx = 0;
+                    (function typeChar() {
+                        if (charIdx < items[itemIdx].length) {
+                            li.innerHTML += items[itemIdx].charAt(charIdx); charIdx++; setTimeout(typeChar, speed);
+                        } else { itemIdx++; nextItem(); }
+                    })();
+                } else { container.classList.remove('typing'); }
+            })();
+        }
+
+        function backToDashboard() {
+            document.getElementById('mealOverview').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+        }
+
+        // SIDEBAR TOGGLE
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        document.getElementById('sidebarToggle').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.add('opacity-100', 'pointer-events-auto'); };
+        document.getElementById('sidebarClose').onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100', 'pointer-events-auto'); };
+        overlay.onclick = document.getElementById('sidebarClose').onclick;
+
+        // COOK BUTTON
+        document.getElementById('cookBtn').onclick = async () => {
+            if (ingredients.length === 0) return alert("Add ingredients!");
+            const btn = document.getElementById('cookBtn');
+            btn.innerText = "CHEF IS BRAINSTORMING..."; btn.disabled = true;
+
+            try {
+                const res = await callAI(`I have: ${ingredients.join(", ")}. Suggest 3-8 Filipino-style meals. Return ONLY JSON array: [{"name": "Name", "time": "X mins"}]`);
+                const meals = JSON.parse(res.replace(/```json|```/g, "").trim());
+                document.getElementById('resultsArea').classList.remove('opacity-0', 'pointer-events-none');
+                document.getElementById('mealsContainer').innerHTML = meals.map(m => `
+                    <div onclick="openMealOverview('${m.name}')" class="meal-card flex items-center h-[100px] border border-green-200 shadow-sm animate-fade-in-down rounded-md px-8">
+                        <div class="flex-grow"><h3 class="text-xl font-bold uppercase">${m.name}</h3><p class="text-[11px] font-bold text-gray-500 uppercase mt-1 tracking-widest">~ ${m.time}</p></div>
+                        <div class="text-gray-400 italic text-xs">VIEW DETAILS</div>
+                    </div>`).join('');
+            } catch { alert("AI Error. Try again."); }
+            finally { btn.innerText = "START COOKING"; btn.disabled = false; }
+        };
+
+        // AUTO-OPEN REDIRECT
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const open = urlParams.get('open');
+            if (open) openMealOverview(decodeURIComponent(open));
+        };
+    </script>
+</body>
+</html>
