@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FridgeWise - Direct Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        body { background-color: #f0fff4; scroll-behavior: smooth; }
+        .hidden { display: none; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-content.open { max-height: 1000px; padding-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-900">
+
+    <div class="max-w-2xl mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6 text-green-800">Direct Search</h1>
+        <div class="flex gap-2 mb-8">
+            <input type="text" id="mealSearchInput" placeholder="What do you want to cook?" class="flex-grow p-3 rounded-lg border border-green-200">
+            <button id="startCookingBtn" onclick="handleDirectSearch()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold">START COOKING</button>
+        </div>
+
+        <div id="mealOverview" class="hidden bg-white p-6 rounded-xl shadow-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="viewMealName" class="text-2xl font-bold uppercase"></h2>
+                <button onclick="toggleFavorite()" class="flex items-center gap-2">
+                    <span id="favStar" class="text-2xl text-gray-400">&#9734;</span>
+                    <span id="favText" class="text-xs text-gray-500">(Mark as favorite)</span>
+                </button>
+            </div>
+            <p class="text-gray-600 italic">Chef is preparing your recipe details...</p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyAZl_HJXjKdycYfYfb4rH7Pue6vwJ9G-KM",
+  authDomain: "fridgewise-37166.firebaseapp.com",
+  databaseURL: "https://fridgewise-37166-default-rtdb.firebaseio.com",
+  projectId: "fridgewise-37166",
+  storageBucket: "fridgewise-37166.firebasestorage.app",
+  messagingSenderId: "367251387454",
+  appId: "1:367251387454:web:ed536522f271197b3d0d6f",
+  measurementId: "G-122HEMEYBR"
+};
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        let currentMealName = "";
+
+        // Wait for user to be ready
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const mealToOpen = urlParams.get('open');
+                if (mealToOpen) {
+                    currentMealName = decodeURIComponent(mealToOpen);
+                    document.getElementById('mealSearchInput').value = currentMealName;
+                    handleDirectSearch(); 
+                }
+            } else {
+                window.location.href = "index.html"; 
+            }
+        });
+
+        async function handleDirectSearch() {
+            const mealName = document.getElementById('mealSearchInput').value.trim();
+            const btn = document.getElementById('startCookingBtn');
+            const user = firebase.auth().currentUser;
+
+            if (!mealName || !user) return;
+
+            btn.innerText = "CHEF IS BRAINSTORMING...";
+            btn.disabled = true;
+            currentMealName = mealName;
+
+            // SAVE TO PRIVATE HISTORY
+            database.ref(`users/${user.uid}/history`).push({
+                name: mealName,
+                ingredients: "Direct Search",
+                cookedAt: Date.now()
+            });
+
+            // CHECK FAVORITE STATUS
+            const mealId = mealName.replace(/[.#$/[\]]/g, "_");
+            database.ref(`users/${user.uid}/favorites/${mealId}`).once('value', s => setStarState(s.exists()));
+
+            document.getElementById('mealOverview').classList.remove('hidden');
+            document.getElementById('viewMealName').innerText = mealName;
+            
+            // Your existing AI logic here...
+            
+            btn.innerText = "START COOKING";
+            btn.disabled = false;
+        }
+
+        function toggleFavorite() {
+            const user = firebase.auth().currentUser;
+            if (!user || !currentMealName) return;
+
+            const mealId = currentMealName.replace(/[.#$/[\]]/g, "_");
+            const favRef = database.ref(`users/${user.uid}/favorites/${mealId}`);
+            
+            favRef.once('value', snapshot => {
+                if (snapshot.exists()) {
+                    favRef.remove().then(() => setStarState(false));
+                } else {
+                    favRef.set({ name: currentMealName, savedAt: Date.now() }).then(() => setStarState(true));
+                }
+            });
+        }
+
+        function setStarState(isFav) {
+            const star = document.getElementById('favStar');
+            star.innerHTML = isFav ? "&#9733;" : "&#9734;";
+            star.style.color = isFav ? "#facc15" : "#9ca3af";
+            document.getElementById('favText').innerText = isFav ? "(Favorited)" : "(Mark as favorite)";
+        }
+    </script>
+</body>
+</html>

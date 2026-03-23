@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FridgeWise - Verify Email</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f0fff4] font-sans antialiased text-gray-900 overflow-x-hidden">
+    <div class="flex flex-col min-h-screen">
+        <header class="bg-[#dcfce7] border-b border-green-200 py-3">
+            <nav class="max-w-[1440px] mx-auto px-6 font-bold text-green-800">FridgeWise</nav>
+        </header>
+
+        <main class="flex-grow flex items-center justify-center py-12">
+            <div class="w-full max-w-sm bg-white p-8 rounded-lg shadow-sm border border-gray-200 text-center">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">Verify Your Email</h1>
+                <p class="text-sm text-gray-600 mb-6">Click the button below to send a verification code to: <br>
+                <span id="targetEmail" class="font-bold text-blue-600"></span></p>
+
+                <button id="sendBtn" class="w-full bg-[#2b87da] text-white font-bold py-3 uppercase tracking-widest hover:bg-blue-600 transition-colors shadow-md">
+                    SEND VERIFICATION CODE
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        emailjs.init("DcrQMridVUedYQcbl"); 
+
+        const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser'));
+        if (!pendingUser) window.location.href = "register.html";
+
+        document.getElementById('targetEmail').innerText = pendingUser.email;
+
+        document.getElementById('sendBtn').addEventListener('click', function() {
+            const randomCode = Math.floor(100000 + Math.random() * 900000);
+            localStorage.setItem('regVerifyCode', randomCode);
+            
+            this.innerText = "SENDING...";
+            this.disabled = true;
+
+            const templateParams = {
+                to_email: pendingUser.email, 
+                code: randomCode,
+                from_name: "FridgeWise Registration"
+            };
+
+            emailjs.send('service_s9ai3m3', 'template_89fhvyh', templateParams)
+                .then(() => {
+                    window.location.href = "createaccountcode2.html";
+                }, (error) => {
+                    alert("Error: " + JSON.stringify(error));
+                    this.innerText = "SEND VERIFICATION CODE";
+                    this.disabled = false;
+                });
+        }); 
+    </script>
+</body>
+</html>

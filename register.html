@@ -32,8 +32,8 @@
                 <form id="registerForm" class="space-y-5">
                     <div>
                         <label class="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-600 mb-1">Name</label>
-                        <input type="text" id="regName" required placeholder="Jiara Martins" class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500">
-                        <p id="nameError" class="text-[10px] text-red-500 mt-1 hidden font-bold">Name must be at least 6 characters.</p>
+                        <input type="text" id="regName" required placeholder="Elijah Kean" class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500">
+                        <p id="nameError" class="text-[10px] mt-1 hidden font-bold"></p>
                     </div>
 
                     <div>
@@ -49,8 +49,8 @@
                     </div>
 
                     <div>
-                    <label class="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-600 mb-1">Date of Birth</label>
-                    <input type="date" id="regDob" required class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500">
+                        <label class="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-600 mb-1">Date of Birth</label>
+                        <input type="date" id="regDob" required class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500">
                     </div>
 
                     <button type="submit" id="signUpBtn" class="w-full bg-[#2b87da] text-white font-bold py-3 uppercase tracking-widest hover:bg-blue-600 transition-colors shadow-md">
@@ -65,158 +65,137 @@
         </main>
     </div>
 
-        <input type="text" id="regName" class="border ...">
-        <p id="nameError" class="text-red-500 text-[10px] mt-1 hidden"></p>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-        <input type="password" id="regPass" class="border ...">
-        <p id="passError" class="text-red-500 text-[10px] mt-1 hidden"></p>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZl_HJXjKdycYfYfb4rH7Pue6vwJ9G-KM",
+            authDomain: "fridgewise-37166.firebaseapp.com",
+            projectId: "fridgewise-37166",
+            storageBucket: "fridgewise-37166.firebasestorage.app",
+            messagingSenderId: "367251387454",
+            appId: "1:367251387454:web:ed536522f271197b3d0d6f"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
- <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyAZl_HJXjKdycYfYfb4rH7Pue6vwJ9G-KM",
-        authDomain: "fridgewise-37166.firebaseapp.com",
-        projectId: "fridgewise-37166",
-        storageBucket: "fridgewise-37166.firebasestorage.app",
-        messagingSenderId: "367251387454",
-        appId: "1:367251387454:web:ed536522f271197b3d0d6f"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-
-    const nameInput = document.getElementById('regName');
-    const emailInput = document.getElementById('regEmail');
-    const passInput = document.getElementById('regPass');
-    const dobInput = document.getElementById('regDob');
-    const signUpBtn = document.getElementById('signUpBtn');
-    
-    const emailStatus = document.getElementById('emailStatus');
-    const nameError = document.getElementById('nameError'); // Use this for both error and success
-    const passError = document.getElementById('passError');
-
-    let isEmailValid = false;
-    let isNameAvailable = false;
-
-    // --- NAME CHECK (Real-time on Blur) ---
-    nameInput.addEventListener('blur', () => {
-        const name = nameInput.value.trim();
+        const nameInput = document.getElementById('regName');
+        const emailInput = document.getElementById('regEmail');
+        const passInput = document.getElementById('regPass');
+        const dobInput = document.getElementById('regDob');
+        const signUpBtn = document.getElementById('signUpBtn');
         
-        if (name === "") {
-            nameInput.style.borderColor = "";
-            nameError.innerText = "";
-            return;
-        }
+        const emailStatus = document.getElementById('emailStatus');
+        const nameError = document.getElementById('nameError');
+        const passError = document.getElementById('passError');
 
-        if (name.length < 6) {
-            nameInput.style.borderColor = "red";
-            nameError.innerText = "The name is too short (min 6 chars)";
-            nameError.style.color = "red";
-            nameError.classList.remove('hidden');
-            isNameAvailable = false;
-        } else {
-            // Check Database for uniqueness
-            db.ref('users').orderByChild('username').equalTo(name).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    nameInput.style.borderColor = "red";
-                    nameError.innerText = "This name is already taken";
-                    nameError.style.color = "red";
-                    nameError.classList.remove('hidden');
-                    isNameAvailable = false;
-                } else {
-                    nameInput.style.borderColor = "#4ade80";
-                    nameError.innerText = "The name is available ✅";
-                    nameError.style.color = "green";
-                    nameError.classList.remove('hidden');
-                    isNameAvailable = true;
-                }
-            });
-        }
-    });
+        let isEmailValid = false;
+        let isNameAvailable = false;
 
-    // --- EMAIL CHECK (Real-time on Blur) ---
-    emailInput.addEventListener('blur', () => {
-        const email = emailInput.value.trim();
-        
-        if (email === "") {
-            emailInput.style.borderColor = "";
-            emailStatus.innerText = "";
-            return;
-        }
+        // --- NAME CHECK ---
+        nameInput.addEventListener('blur', () => {
+            const name = nameInput.value.trim();
+            if (name === "") {
+                nameInput.style.borderColor = "";
+                nameError.classList.add('hidden');
+                return;
+            }
 
-        if (!email.endsWith('@gmail.com')) {
-            emailInput.style.borderColor = "red";
-            emailStatus.innerText = "❌ Must be a @gmail.com address";
-            emailStatus.style.color = "red";
-            isEmailValid = false;
-            return;
-        }
+            if (name.length < 6) {
+                nameInput.style.borderColor = "red";
+                nameError.innerText = "The name is too short (min 6 chars)";
+                nameError.style.color = "red";
+                nameError.classList.remove('hidden');
+                isNameAvailable = false;
+            } else {
+                db.ref('users').orderByChild('username').equalTo(name).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        nameInput.style.borderColor = "red";
+                        nameError.innerText = "This name is already taken";
+                        nameError.style.color = "red";
+                        nameError.classList.remove('hidden');
+                        isNameAvailable = false;
+                    } else {
+                        nameInput.style.borderColor = "#4ade80";
+                        nameError.innerText = "The name is available ✅";
+                        nameError.style.color = "green";
+                        nameError.classList.remove('hidden');
+                        isNameAvailable = true;
+                    }
+                });
+            }
+        });
 
-        auth.fetchSignInMethodsForEmail(email).then((methods) => {
-            if (methods && methods.length > 0) {
+        // --- EMAIL CHECK ---
+        emailInput.addEventListener('blur', () => {
+            const email = emailInput.value.trim();
+            if (email === "") {
+                emailInput.style.borderColor = "";
+                emailStatus.innerText = "";
+                return;
+            }
+
+            if (!email.endsWith('@gmail.com')) {
                 emailInput.style.borderColor = "red";
-                emailStatus.innerText = "❌ Email already registered";
+                emailStatus.innerText = "❌ Must be a @gmail.com address";
                 emailStatus.style.color = "red";
                 isEmailValid = false;
-            } else {
-                emailInput.style.borderColor = "#4ade80";
-                emailStatus.innerText = "✅ Email available";
-                emailStatus.style.color = "green";
-                isEmailValid = true;
+                return;
             }
-        }).catch(err => console.error(err));
-    });
 
-    // --- PASSWORD CHECK (Real-time on Blur) ---
-    passInput.addEventListener('blur', () => {
-        if (passInput.value.length < 6) {
-            passInput.style.borderColor = "red";
-            passError.innerText = "Password is too short (min 6 chars)";
-            passError.classList.remove('hidden');
-        } else {
-            passInput.style.borderColor = "#4ade80";
-            passError.classList.add('hidden');
-        }
-    });
+            auth.fetchSignInMethodsForEmail(email).then((methods) => {
+                if (methods && methods.length > 0) {
+                    emailInput.style.borderColor = "red";
+                    emailStatus.innerText = "❌ Email already registered";
+                    emailStatus.style.color = "red";
+                    isEmailValid = false;
+                } else {
+                    emailInput.style.borderColor = "#4ade80";
+                    emailStatus.innerText = "✅ Email available";
+                    emailStatus.style.color = "green";
+                    isEmailValid = true;
+                }
+            }).catch(err => console.error(err));
+        });
 
-    // --- FINAL SUBMIT ---
-    document.getElementById('registerForm').addEventListener('submit', (e) => {
-        e.preventDefault();
+        // --- PASSWORD CHECK ---
+        passInput.addEventListener('blur', () => {
+            if (passInput.value.length < 6) {
+                passInput.style.borderColor = "red";
+                passError.classList.remove('hidden');
+            } else {
+                passInput.style.borderColor = "#4ade80";
+                passError.classList.add('hidden');
+            }
+        });
 
-        if (!dobInput.value) {
-            alert("Please provide your Date of Birth.");
-            return;
-        }
+        // --- REDIRECT TO VERIFICATION FLOW ---
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
 
-        if (!isEmailValid || !isNameAvailable || passInput.value.length < 6) {
-            alert("Please fix all errors before signing up.");
-            return;
-        }
+            if (!isEmailValid || !isNameAvailable || passInput.value.length < 6) {
+                alert("Please fix all errors before signing up.");
+                return;
+            }
 
-        signUpBtn.innerText = "CREATING ACCOUNT...";
-        signUpBtn.disabled = true;
+            // Save user data temporarily in sessionStorage 
+            // This stays until the tab is closed, but isn't permanent in DB yet.
+            const pendingUser = {
+                name: nameInput.value.trim(),
+                email: emailInput.value.trim(),
+                pass: passInput.value,
+                dob: dobInput.value
+            };
+            
+            sessionStorage.setItem('pendingUser', JSON.stringify(pendingUser));
 
-        auth.createUserWithEmailAndPassword(emailInput.value.trim(), passInput.value)
-            .then((userCredential) => {
-                db.ref('users/' + userCredential.user.uid).set({
-                    username: nameInput.value.trim(),
-                    email: emailInput.value.trim(),
-                    dob: dobInput.value,
-                    createdAt: new Date().toISOString()
-                }).then(() => {
-                    window.location.href = "index.html?status=verified";
-                });
-            })
-            .catch((error) => {
-                alert("Sign up failed: " + error.message);
-                signUpBtn.innerText = "SIGN UP";
-                signUpBtn.disabled = false;
-            });
-    });
-</script>
+            // Proceed to send verification code
+            window.location.href = "createaccountcode.html";
+        });
+    </script>
 
 </body>
 </html>
