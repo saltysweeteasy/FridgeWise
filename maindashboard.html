@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <style>
         body { background-color: #f0fff4; }
@@ -82,35 +83,105 @@
 </head>
 <body class="font-sans antialiased text-gray-900 overflow-x-hidden">
 
+    <!-- Left Sidebar -->
     <div id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out z-[60]">
         <div class="p-8">
             <div class="flex items-center justify-between mb-10">
                 <h2 class="text-2xl font-bold text-green-800">FridgeWise</h2>
                 <button id="sidebarClose" class="text-gray-400 hover:text-red-500">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
             <nav class="space-y-4">
+                <a href="index.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> 
+                    Home
+                </a>
+
+                <a href="maindashboard.html" class="flex items-center py-3 px-4 rounded-xl bg-green-50 text-green-900 border-l-4 border-green-600 transition-colors font-semibold">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> 
+                    Main Dashboard
+                </a>
+
+                <a href="secondarydashboard.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg> 
+                    Second Dashboard
+                </a>
+
+                <div class="my-4 border-t border-gray-100"></div>
+
                 <a href="cookinghistory.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Cooking History
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Cooking History
                 </a>
                 <a href="favoritemeal.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> Favorite Recipes
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> 
+                    Favorite Recipes
                 </a>
             </nav>
         </div>
     </div>
+
+    <!-- Right Sidebar (User Profile) -->
+    <div id="userSidebar" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[60] border-l border-gray-100">
+        <div class="p-8 flex flex-col h-full">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-xl font-bold text-gray-800">Profile</h2>
+                <button id="userSidebarClose" class="text-gray-400 hover:text-red-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                    <span id="userInitial" class="text-2xl font-bold text-green-700 uppercase">?</span>
+                </div>
+                <h3 id="userNameDisplay" class="text-lg font-bold text-gray-900">Loading...</h3>
+                <p id="userEmailDisplay" class="text-sm text-gray-500">...</p>
+            </div>
+
+            <div class="border-t border-gray-100 my-4"></div>
+
+            <button id="logoutBtn" class="w-full mt-auto bg-red-50 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                LOGOUT
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
 
+    <!-- Main Dashboard -->
     <div id="mainDashboard" class="flex flex-col min-h-screen">
         <header class="bg-[#dcfce7] border-b border-green-200 shadow-sm sticky top-0 z-50">
             <nav class="max-w-[1440px] mx-auto px-6 py-3 flex items-center justify-between">
                 <div class="flex items-center">
-                    <button id="sidebarToggle" class="text-gray-600 hover:text-gray-900 p-2"><svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+                    <button id="sidebarToggle" class="text-gray-600 hover:text-gray-900 p-2">
+                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
                     <div class="h-8 border-l border-green-300 mx-4"></div>
                     <h1 class="text-2xl font-extrabold tracking-tighter text-[#065f46]">DIGITAL KITCHEN</h1>
                 </div>
-                <div class="text-sm font-medium text-gray-600">Chef Salty</div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative w-72">
+                        <input type="text" id="searchInput" placeholder="Search meals..." class="w-full bg-white border border-gray-300 rounded-lg pl-4 pr-10 py-1.5 text-sm focus:ring-2 focus:ring-green-400 outline-none">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </span>
+                    </div>
+                    <button id="userMenuToggle" class="text-gray-700 bg-white hover:bg-gray-50 rounded-full p-1.5 border border-gray-300 shadow-sm">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </button>
+                </div>
             </nav>
         </header>
 
@@ -137,10 +208,13 @@
         </main>
     </div>
 
+    <!-- Meal Overview -->
     <div id="mealOverview" class="hidden flex flex-col min-h-screen">
         <header class="bg-[#dcfce7] border-b border-green-200 shadow-sm sticky top-0 z-50">
             <nav class="max-w-[1440px] mx-auto px-6 py-3 flex items-center justify-between">
-                <button onclick="backToDashboard()" class="text-[#065f46] font-bold flex items-center"><svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg> BACK</button>
+                <button onclick="backToDashboard()" class="text-[#065f46] font-bold flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg> BACK
+                </button>
                 <h1 class="text-2xl font-extrabold tracking-tighter text-[#065f46]">DIGITAL KITCHEN</h1>
                 <div class="w-10"></div>
             </nav>
@@ -225,11 +299,36 @@
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth();
 
         // --- GLOBALS ---
         let ingredients = [];
-        const API_KEY = "AIzaSyAssLbne68s2bf2puahAKWQj92P7z5S_MY";
+        const API_KEY = "AIzaSyB9jUcYFOZejIG6p0bh6DrkCryAh80GDoE";
         let currentMealName = "";
+        let currentUser = null;
+
+        // --- AUTH STATE CHECK ---
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+            currentUser = user;
+            
+            // Load user profile data
+            database.ref('users/' + user.uid).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                const name = (data && data.username) ? data.username : (user.displayName || "User");
+                updateProfileUI(name, user.email);
+            });
+        });
+
+        // --- UPDATE PROFILE UI ---
+        function updateProfileUI(name, email) {
+            document.getElementById('userNameDisplay').textContent = name;
+            document.getElementById('userEmailDisplay').textContent = email;
+            document.getElementById('userInitial').textContent = name.charAt(0).toUpperCase();
+        }
 
         // --- UI HELPERS ---
         function setStarState(isFav) {
@@ -262,7 +361,7 @@
         function renderList() {
             document.getElementById('ingList').innerHTML = ingredients.map((ing, i) => `
                 <li class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <span class="font-medium text-gray-700">${ing}</span>
+                    <span class="font-medium text-gray-700">${escapeHtml(ing)}</span>
                     <div class="flex gap-4">
                         <button onclick="editIng(${i})" class="text-blue-500 text-xs font-bold uppercase hover:underline">Edit</button>
                         <button onclick="ingredients.splice(${i},1);renderList()" class="text-red-400 font-bold">✕</button>
@@ -272,10 +371,15 @@
 
         // --- MEAL OVERVIEW & HISTORY LOGIC ---
         async function openMealOverview(name) {
+            if (!currentUser) {
+                alert("Please log in first!");
+                return;
+            }
+            
             currentMealName = name;
 
-            // --- LOG TO COOKING HISTORY ---
-            const historyRef = database.ref('history').push();
+            // --- LOG TO COOKING HISTORY (User-specific) ---
+            const historyRef = database.ref(`users/${currentUser.uid}/history`).push();
             historyRef.set({
                 name: name,
                 ingredients: ingredients.length > 0 ? ingredients.join(", ") : "None specified",
@@ -287,7 +391,7 @@
             document.getElementById('viewMealName').innerText = name;
             
             const mealId = name.replace(/[.#$/[\]]/g, "_");
-            database.ref('favorites/' + mealId).once('value', s => setStarState(s.exists()));
+            database.ref(`users/${currentUser.uid}/favorites/${mealId}`).once('value', s => setStarState(s.exists()));
 
             document.querySelectorAll('.accordion-content').forEach(el => { el.classList.remove('open'); el.innerHTML = ""; });
             document.querySelectorAll('#accordionGroup span').forEach(s => s.innerText = "+");
@@ -305,9 +409,9 @@
         }
 
         function toggleFavorite() {
-            if (!currentMealName) return;
+            if (!currentUser || !currentMealName) return;
             const mealId = currentMealName.replace(/[.#$/[\]]/g, "_");
-            const favRef = database.ref('favorites/' + mealId);
+            const favRef = database.ref(`users/${currentUser.uid}/favorites/${mealId}`);
 
             favRef.once('value', snapshot => {
                 if (snapshot.exists()) {
@@ -406,15 +510,50 @@
             document.getElementById('mainDashboard').classList.remove('hidden');
         }
 
-        // Sidebar logic
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        document.getElementById('sidebarToggle').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.add('opacity-100', 'pointer-events-auto'); };
-        document.getElementById('sidebarClose').onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100', 'pointer-events-auto'); };
-        overlay.onclick = document.getElementById('sidebarClose').onclick;
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
-        // Cook Button Logic
+        // --- SIDEBAR LOGIC ---
+        const sidebar = document.getElementById('sidebar');
+        const userSidebar = document.getElementById('userSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        function closeAll() {
+            sidebar.classList.add('-translate-x-full');
+            userSidebar.classList.add('translate-x-full');
+            overlay.classList.remove('opacity-100', 'pointer-events-auto');
+        }
+
+        document.getElementById('sidebarToggle').onclick = () => {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.add('opacity-100', 'pointer-events-auto');
+        };
+
+        document.getElementById('userMenuToggle').onclick = () => {
+            userSidebar.classList.remove('translate-x-full');
+            overlay.classList.add('opacity-100', 'pointer-events-auto');
+        };
+
+        document.getElementById('sidebarClose').onclick = closeAll;
+        document.getElementById('userSidebarClose').onclick = closeAll;
+        overlay.onclick = closeAll;
+
+        // --- LOGOUT ACTION ---
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        });
+
+        // --- COOK BUTTON LOGIC ---
         document.getElementById('cookBtn').onclick = async () => {
+            if (!currentUser) {
+                alert("Please log in first!");
+                return;
+            }
             if (ingredients.length === 0) return alert("Add ingredients first!");
             const btn = document.getElementById('cookBtn');
             btn.innerText = "CHEF IS BRAINSTORMING..."; btn.disabled = true;
@@ -423,13 +562,31 @@
                 const meals = JSON.parse(res.replace(/```json|```/g, "").trim());
                 document.getElementById('resultsArea').classList.remove('opacity-0', 'pointer-events-none');
                 document.getElementById('mealsContainer').innerHTML = meals.map(m => `
-                    <div onclick="openMealOverview('${m.name}')" class="meal-card flex items-center h-[100px] border border-green-200 shadow-sm animate-fade-in-down rounded-md px-8">
-                        <div class="flex-grow"><h3 class="text-xl font-bold uppercase">${m.name}</h3><p class="text-[11px] font-bold text-gray-500 uppercase mt-1 tracking-widest">~ ${m.time}</p></div>
+                    <div onclick="openMealOverview('${escapeHtml(m.name)}')" class="meal-card flex items-center h-[100px] border border-green-200 shadow-sm animate-fade-in-down rounded-md px-8">
+                        <div class="flex-grow"><h3 class="text-xl font-bold uppercase">${escapeHtml(m.name)}</h3><p class="text-[11px] font-bold text-gray-500 uppercase mt-1 tracking-widest">~ ${escapeHtml(m.time)}</p></div>
                         <div class="text-gray-400 italic text-xs">VIEW DETAILS</div>
                     </div>`).join('');
-            } catch { alert("AI Error. Try again."); }
+            } catch (error) { 
+                console.error(error);
+                alert("AI Error. Try again."); 
+            }
             finally { btn.innerText = "START COOKING"; btn.disabled = false; }
         };
+
+        // --- SEARCH FUNCTIONALITY ---
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keyup', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const mealCards = document.querySelectorAll('#mealsContainer .meal-card');
+            mealCards.forEach(card => {
+                const mealName = card.querySelector('h3').innerText.toLowerCase();
+                if (mealName.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
 
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
