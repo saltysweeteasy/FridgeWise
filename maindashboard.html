@@ -79,6 +79,45 @@
             transform: scale(1.1) translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
+
+        /* Loading Video Container - Full width, blends with background */
+        .loading-video-container {
+            width: 100%;
+            min-height: 400px;
+            background-color: #f0fff4;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 40px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .loading-video-container video {
+            height: 400px;
+            width: auto;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+        
+        /* Content wrapper for dynamic swapping */
+        .dynamic-content-wrapper {
+            position: relative;
+            min-height: 450px;
+        }
+        
+        .loading-screen, .results-screen {
+            transition: opacity 0.4s ease-in-out;
+        }
+        
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .fade-in {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="font-sans antialiased text-gray-900 overflow-x-hidden">
@@ -187,6 +226,7 @@
 
         <main class="flex-grow flex items-center justify-center py-12 px-6">
             <div class="w-full max-w-[1200px] grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                <!-- Left Column: Ingredients -->
                 <div class="space-y-6">
                     <h2 class="text-3xl font-bold tracking-tight text-gray-800 uppercase">Ingredients</h2>
                     <div class="bg-white border border-gray-300 rounded-xl h-[400px] shadow-sm flex flex-col overflow-hidden">
@@ -200,15 +240,34 @@
                         <button id="cookBtn" class="w-full bg-[#2b87da] text-white font-bold py-4 uppercase tracking-widest hover:bg-blue-600 shadow-lg rounded-lg">START COOKING</button>
                     </div>
                 </div>
+                
+                <!-- Right Column: Results Area with Dynamic Content Swapping -->
                 <div id="resultsArea" class="space-y-6 opacity-0 pointer-events-none transition-opacity duration-500">
                     <h2 class="text-3xl font-bold tracking-tight text-gray-800 uppercase">Possible Meals</h2>
-                    <div id="mealsContainer" class="space-y-4"></div>
+                    
+                    <!-- Dynamic Content Wrapper - Swaps between loading video and meal results -->
+                    <div id="dynamicContentWrapper" class="dynamic-content-wrapper">
+                        <!-- Loading Screen (Video) - Initially hidden -->
+                        <div id="loadingScreen" class="loading-screen hidden">
+                            <div class="loading-video-container">
+                                <video id="loadingVideo" loop muted playsinline>
+                                    <source src="mixtest2.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Screen (Meals) - Initially hidden -->
+                        <div id="resultsScreen" class="results-screen">
+                            <div id="mealsContainer" class="space-y-4"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Meal Overview -->
+    <!-- Meal Overview (unchanged) -->
     <div id="mealOverview" class="hidden flex flex-col min-h-screen">
         <header class="bg-[#dcfce7] border-b border-green-200 shadow-sm sticky top-0 z-50">
             <nav class="max-w-[1440px] mx-auto px-6 py-3 flex items-center justify-between">
@@ -303,7 +362,7 @@
 
         // --- GLOBALS ---
         let ingredients = [];
-        const API_KEY = "AIzaSyB9jUcYFOZejIG6p0bh6DrkCryAh80GDoE";
+        const API_KEY = "AIzaSyDXxmzjioPyHVu1_IKRmseIdpSKLcvbpu8";
         let currentMealName = "";
         let currentUser = null;
 
@@ -314,8 +373,6 @@
                 return;
             }
             currentUser = user;
-            
-            // Load user profile data
             database.ref('users/' + user.uid).once('value').then((snapshot) => {
                 const data = snapshot.val();
                 const name = (data && data.username) ? data.username : (user.displayName || "User");
@@ -323,14 +380,12 @@
             });
         });
 
-        // --- UPDATE PROFILE UI ---
         function updateProfileUI(name, email) {
             document.getElementById('userNameDisplay').textContent = name;
             document.getElementById('userEmailDisplay').textContent = email;
             document.getElementById('userInitial').textContent = name.charAt(0).toUpperCase();
         }
 
-        // --- UI HELPERS ---
         function setStarState(isFav) {
             const star = document.getElementById('favStar');
             const text = document.getElementById('favText');
@@ -345,7 +400,6 @@
             }
         }
 
-        // --- INGREDIENTS LOGIC ---
         function addIng() {
             const input = document.getElementById('ingInput');
             if (input.value.trim()) { ingredients.push(input.value.trim()); input.value = ''; renderList(); }
@@ -369,39 +423,23 @@
                 </li>`).join('');
         }
 
-        // --- MEAL OVERVIEW & HISTORY LOGIC ---
         async function openMealOverview(name) {
-            if (!currentUser) {
-                alert("Please log in first!");
-                return;
-            }
-            
+            if (!currentUser) { alert("Please log in first!"); return; }
             currentMealName = name;
-
-            // --- LOG TO COOKING HISTORY (User-specific) ---
             const historyRef = database.ref(`users/${currentUser.uid}/history`).push();
-            historyRef.set({
-                name: name,
-                ingredients: ingredients.length > 0 ? ingredients.join(", ") : "None specified",
-                cookedAt: Date.now()
-            });
-
+            historyRef.set({ name: name, ingredients: ingredients.length > 0 ? ingredients.join(", ") : "None specified", cookedAt: Date.now() });
             document.getElementById('mainDashboard').classList.add('hidden');
             document.getElementById('mealOverview').classList.remove('hidden');
             document.getElementById('viewMealName').innerText = name;
-            
             const mealId = name.replace(/[.#$/[\]]/g, "_");
             database.ref(`users/${currentUser.uid}/favorites/${mealId}`).once('value', s => setStarState(s.exists()));
-
             document.querySelectorAll('.accordion-content').forEach(el => { el.classList.remove('open'); el.innerHTML = ""; });
             document.querySelectorAll('#accordionGroup span').forEach(s => s.innerText = "+");
-
             const img = document.getElementById('overviewImg');
             const loader = document.getElementById('imageLoader');
             img.classList.add('hidden'); loader.classList.remove('hidden');
             img.src = `https://loremflickr.com/600/600/${encodeURIComponent(name)},dish,food/all?lock=${Math.floor(Math.random()*1000)}`;
             img.onload = () => { img.classList.remove('hidden'); loader.classList.add('hidden'); };
-
             const descEl = document.getElementById('mealDesc');
             descEl.innerText = "";
             const res = await callAI(`Give a short, appetizing 2-sentence Filipino description for ${name}.`);
@@ -412,18 +450,11 @@
             if (!currentUser || !currentMealName) return;
             const mealId = currentMealName.replace(/[.#$/[\]]/g, "_");
             const favRef = database.ref(`users/${currentUser.uid}/favorites/${mealId}`);
-
             favRef.once('value', snapshot => {
                 if (snapshot.exists()) {
-                    favRef.remove().then(() => {
-                        setStarState(false);
-                        alert("The meal is unfavorited");
-                    });
+                    favRef.remove().then(() => { setStarState(false); alert("The meal is unfavorited"); });
                 } else {
-                    favRef.set({ name: currentMealName, savedAt: Date.now() }).then(() => {
-                        setStarState(true);
-                        alert("The meal is favorited");
-                    });
+                    favRef.set({ name: currentMealName, savedAt: Date.now() }).then(() => { setStarState(true); alert("The meal is favorited"); });
                 }
             });
         }
@@ -446,30 +477,19 @@
             }
         }
 
-        // --- SHARING LOGIC ---
         function shareMeal(platform) {
             if (!currentMealName) return;
-            
             const baseUrl = window.location.href.split('?')[0]; 
             const shareUrl = `${baseUrl}?open=${encodeURIComponent(currentMealName)}`;
-
             if (platform === 'link') {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert("Recipe link copied to clipboard!");
-                }).catch(() => {
-                    alert("Failed to copy link: " + shareUrl);
-                });
+                navigator.clipboard.writeText(shareUrl).then(() => alert("Recipe link copied to clipboard!"));
             } else if (platform === 'messenger') {
-                const webMessenger = `https://www.messenger.com/share/?link=${encodeURIComponent(shareUrl)}`;
-                window.open(webMessenger, '_blank', 'width=600,height=400');
+                window.open(`https://www.messenger.com/share/?link=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
             } else if (platform === 'instagram') {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert("Link copied! You can now paste this link in your Instagram DM or Story.");
-                });
+                navigator.clipboard.writeText(shareUrl).then(() => alert("Link copied! You can now paste this link in your Instagram DM or Story."));
             }
         }
 
-        // --- AI UTILS ---
         async function callAI(text) {
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`, {
@@ -531,46 +551,74 @@
             sidebar.classList.remove('-translate-x-full');
             overlay.classList.add('opacity-100', 'pointer-events-auto');
         };
-
         document.getElementById('userMenuToggle').onclick = () => {
             userSidebar.classList.remove('translate-x-full');
             overlay.classList.add('opacity-100', 'pointer-events-auto');
         };
-
         document.getElementById('sidebarClose').onclick = closeAll;
         document.getElementById('userSidebarClose').onclick = closeAll;
         overlay.onclick = closeAll;
-
-        // --- LOGOUT ACTION ---
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            auth.signOut().then(() => {
-                window.location.href = 'index.html';
-            });
+            auth.signOut().then(() => window.location.href = 'index.html');
         });
 
-        // --- COOK BUTTON LOGIC ---
+        // --- COOK BUTTON LOGIC WITH PROPER VIDEO SWAPPING ---
         document.getElementById('cookBtn').onclick = async () => {
             if (!currentUser) {
                 alert("Please log in first!");
                 return;
             }
             if (ingredients.length === 0) return alert("Add ingredients first!");
+            
             const btn = document.getElementById('cookBtn');
-            btn.innerText = "CHEF IS BRAINSTORMING..."; btn.disabled = true;
+            const resultsArea = document.getElementById('resultsArea');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const resultsScreen = document.getElementById('resultsScreen');
+            const loadingVideo = document.getElementById('loadingVideo');
+            const mealsContainer = document.getElementById('mealsContainer');
+
+            btn.innerText = "CHEF IS BRAINSTORMING..."; 
+            btn.disabled = true;
+            
+            // Show results area
+            resultsArea.classList.remove('opacity-0', 'pointer-events-none');
+            
+            // Hide results screen, show loading screen with video
+            resultsScreen.classList.add('hidden');
+            loadingScreen.classList.remove('hidden');
+            
+            // Start video playback
+            loadingVideo.currentTime = 0;
+            loadingVideo.play().catch(e => console.log("Video autoplay prevented:", e));
+
             try {
                 const res = await callAI(`I have: ${ingredients.join(", ")}. Suggest 3-8 Filipino-style meals. Return ONLY JSON array: [{"name": "Name", "time": "X mins"}]`);
                 const meals = JSON.parse(res.replace(/```json|```/g, "").trim());
-                document.getElementById('resultsArea').classList.remove('opacity-0', 'pointer-events-none');
-                document.getElementById('mealsContainer').innerHTML = meals.map(m => `
+                
+                // Stop video
+                loadingVideo.pause();
+                
+                // COMPLETELY REMOVE loading screen and SHOW results screen in the exact same position
+                loadingScreen.classList.add('hidden');
+                resultsScreen.classList.remove('hidden');
+                
+                // Populate meals
+                mealsContainer.innerHTML = meals.map(m => `
                     <div onclick="openMealOverview('${escapeHtml(m.name)}')" class="meal-card flex items-center h-[100px] border border-green-200 shadow-sm animate-fade-in-down rounded-md px-8">
                         <div class="flex-grow"><h3 class="text-xl font-bold uppercase">${escapeHtml(m.name)}</h3><p class="text-[11px] font-bold text-gray-500 uppercase mt-1 tracking-widest">~ ${escapeHtml(m.time)}</p></div>
                         <div class="text-gray-400 italic text-xs">VIEW DETAILS</div>
                     </div>`).join('');
             } catch (error) { 
                 console.error(error);
+                loadingVideo.pause();
+                loadingScreen.classList.add('hidden');
+                resultsScreen.classList.remove('hidden');
+                mealsContainer.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-700 font-semibold">⚠️ AI service error. Please try again.</div>';
                 alert("AI Error. Try again."); 
+            } finally { 
+                btn.innerText = "START COOKING"; 
+                btn.disabled = false; 
             }
-            finally { btn.innerText = "START COOKING"; btn.disabled = false; }
         };
 
         // --- SEARCH FUNCTIONALITY ---
@@ -580,11 +628,7 @@
             const mealCards = document.querySelectorAll('#mealsContainer .meal-card');
             mealCards.forEach(card => {
                 const mealName = card.querySelector('h3').innerText.toLowerCase();
-                if (mealName.includes(searchTerm)) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = mealName.includes(searchTerm) ? '' : 'none';
             });
         });
 
