@@ -105,15 +105,25 @@
             loginBtn.innerText = "AUTHENTICATING...";
             loginBtn.disabled = true;
 
-            // 2. Firebase Sign In
-            auth.signInWithEmailAndPassword(email, password)
+            // 2. Set Persistence to LOCAL then Sign In
+            // This ensures the session is saved in the browser even after redirect
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                .then(() => {
+                    return auth.signInWithEmailAndPassword(email, password);
+                })
                 .then((userCredential) => {
-                    // Success! Redirect to verified version
-                    window.location.href = "index.html?status=verified";
+                    // Success! 
+                    loginBtn.innerText = "SUCCESS! REDIRECTING...";
+                    loginBtn.style.backgroundColor = "#16a34a"; // Green feedback
+                    
+                    // Give Firebase a moment to store the token before redirecting
+                    setTimeout(() => {
+                        window.location.href = "index.html?status=verified";
+                    }, 800);
                 })
                 .catch((error) => {
                     // Fail! Handle mismatch
-                    console.error(error.code);
+                    console.error("Login Error:", error.code);
                     
                     loginBtn.innerText = "LOG IN";
                     loginBtn.disabled = false;
@@ -129,6 +139,5 @@
                 });
         });
     </script>
-
 </body>
 </html>
