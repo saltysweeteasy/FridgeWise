@@ -18,6 +18,7 @@
                         </svg>
                     </button>
                     <div class="h-8 border-l border-green-300 mx-4"></div>
+                    <span class="font-bold text-green-800 text-xl uppercase tracking-tighter">FridgeWise</span>
                 </div>
             </nav>
         </header>
@@ -31,21 +32,21 @@
 
                 <form id="registerForm" class="space-y-5">
                     <div>
-                        <label class="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-600 mb-1">Name</label>
+                        <label class="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-600 mb-1">Username</label>
                         <input type="text" id="regName" required placeholder="Elijah Kean" class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500">
                         <p id="nameError" class="text-[10px] mt-1 hidden font-bold"></p>
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-600 mb-1">Email</label>
-                        <input type="email" id="regEmail" required placeholder="hello@reallygreatsite.com" class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500 transition-colors">
-                        <p id="emailStatus" class="text-[10px] mt-1 font-bold"></p>
+                        <input type="email" id="regEmail" required placeholder="hello@gmail.com" class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500 transition-colors">
+                        <p id="emailStatus" class="text-[10px] mt-1 font-bold uppercase"></p>
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-bold tracking-[0.2em] uppercase text-gray-600 mb-1">Password</label>
                         <input type="password" id="regPass" required placeholder="******" class="w-full border border-gray-400 bg-white p-3 outline-none focus:border-blue-500">
-                        <p id="passError" class="text-[10px] text-red-500 mt-1 hidden font-bold">Password must be at least 6 characters.</p>
+                        <p id="passError" class="text-[10px] text-red-500 mt-1 hidden font-bold uppercase">Password must be at least 6 characters.</p>
                     </div>
 
                     <div>
@@ -95,7 +96,7 @@
         let isEmailValid = false;
         let isNameAvailable = false;
 
-        // --- NAME CHECK ---
+        // --- NAME CHECK (Username Availability) ---
         nameInput.addEventListener('blur', () => {
             const name = nameInput.value.trim();
             if (name === "") {
@@ -104,9 +105,9 @@
                 return;
             }
 
-            if (name.length < 6) {
+            if (name.length < 3) {
                 nameInput.style.borderColor = "red";
-                nameError.innerText = "The name is too short (min 6 chars)";
+                nameError.innerText = "Username too short";
                 nameError.style.color = "red";
                 nameError.classList.remove('hidden');
                 isNameAvailable = false;
@@ -129,7 +130,7 @@
             }
         });
 
-        // --- EMAIL CHECK ---
+        // --- EMAIL CHECK (@gmail.com restriction + Availability) ---
         emailInput.addEventListener('blur', () => {
             const email = emailInput.value.trim();
             if (email === "") {
@@ -161,7 +162,7 @@
             }).catch(err => console.error(err));
         });
 
-        // --- PASSWORD CHECK ---
+        // --- PASSWORD CHECK (Length) ---
         passInput.addEventListener('blur', () => {
             if (passInput.value.length < 6) {
                 passInput.style.borderColor = "red";
@@ -172,7 +173,7 @@
             }
         });
 
-        // --- REDIRECT TO VERIFICATION FLOW ---
+        // --- SUBMIT: SAVE TO SESSION AND VERIFY ---
         document.getElementById('registerForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -181,10 +182,10 @@
                 return;
             }
 
-            // Save user data temporarily in sessionStorage 
-            // This stays until the tab is closed, but isn't permanent in DB yet.
+            // Save user data temporarily in sessionStorage for the verification step
+            // Note: 'pass' is included here so 'createaccountcode.html' can save it to the DB later.
             const pendingUser = {
-                name: nameInput.value.trim(),
+                username: nameInput.value.trim(),
                 email: emailInput.value.trim(),
                 pass: passInput.value,
                 dob: dobInput.value
@@ -192,10 +193,9 @@
             
             sessionStorage.setItem('pendingUser', JSON.stringify(pendingUser));
 
-            // Proceed to send verification code
+            // Proceed to send verification code page
             window.location.href = "createaccountcode.html";
         });
     </script>
-
 </body>
 </html>
