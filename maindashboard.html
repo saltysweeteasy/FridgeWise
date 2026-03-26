@@ -84,7 +84,7 @@
         .loading-video-container {
             width: 100%;
             min-height: 400px;
-            background-color: #f0fff4;
+            background-color: transparent;
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -100,6 +100,31 @@
             mix-blend-mode: multiply;
         }
         
+        /* Initial video container - fully transparent, same transform as previous image */
+        .initial-video-container {
+            width: 100%;
+            min-height: 400px;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            overflow: visible;
+            position: relative;
+        }
+        
+        #initialVideo {
+            max-width: 90%;
+            max-height: 380px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            transform: translate(62px, -282px) scale(2.73);
+            transform-origin: center;
+            will-change: transform;
+        }
+        
         /* Content wrapper for dynamic swapping */
         .dynamic-content-wrapper {
             position: relative;
@@ -109,20 +134,11 @@
         .loading-screen, .results-screen {
             transition: opacity 0.4s ease-in-out;
         }
-        
-        .fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .fade-in {
-            opacity: 1;
-        }
     </style>
 </head>
 <body class="font-sans antialiased text-gray-900 overflow-x-hidden">
 
-    <!-- Left Sidebar (Updated to match index.html) -->
+    <!-- Left Sidebar (same as before) -->
     <div id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out z-[60]">
         <div class="p-8">
             <div class="flex items-center justify-between mb-10">
@@ -160,7 +176,6 @@
                     Favorite Recipes
                 </a>
 
-                <!-- About Us link -->
                 <a href="aboutus.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     About Us
@@ -257,11 +272,18 @@
                 </div>
                 
                 <!-- Right Column: Results Area with Dynamic Content Swapping -->
-                <div id="resultsArea" class="space-y-6 opacity-0 pointer-events-none transition-opacity duration-500">
+                <div id="resultsArea" class="space-y-6">
                     <h2 class="text-3xl font-bold tracking-tight text-gray-800 uppercase">Possible Meals</h2>
                     
-                    <!-- Dynamic Content Wrapper - Swaps between loading video and meal results -->
                     <div id="dynamicContentWrapper" class="dynamic-content-wrapper">
+                        <!-- INITIAL VIDEO CONTAINER (linguini_thinking.mp4) - visible on page load -->
+                        <div id="initialVideoContainer" class="initial-video-container">
+                            <video id="initialVideo" autoplay loop muted playsinline>
+                                <source src="linguinithinking.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        
                         <!-- Loading Screen (Video) - Initially hidden -->
                         <div id="loadingScreen" class="loading-screen hidden">
                             <div class="loading-video-container">
@@ -273,7 +295,7 @@
                         </div>
                         
                         <!-- Results Screen (Meals) - Initially hidden -->
-                        <div id="resultsScreen" class="results-screen">
+                        <div id="resultsScreen" class="results-screen hidden">
                             <div id="mealsContainer" class="space-y-4"></div>
                         </div>
                     </div>
@@ -360,7 +382,7 @@
     </div>
 
     <script>
-        // --- FIREBASE CONFIG ---
+        // --- FIREBASE CONFIG (unchanged) ---
         const firebaseConfig = {
             apiKey: "AIzaSyAZl_HJXjKdycYfYfb4rH7Pue6vwJ9G-KM",
             authDomain: "fridgewise-37166.firebaseapp.com",
@@ -381,7 +403,14 @@
         let currentMealName = "";
         let currentUser = null;
 
-        // --- AUTH STATE CHECK ---
+        // --- DOM Elements for dynamic containers ---
+        const initialVideoContainer = document.getElementById('initialVideoContainer');
+        const loadingScreenDiv = document.getElementById('loadingScreen');
+        const resultsScreenDiv = document.getElementById('resultsScreen');
+        const loadingVideo = document.getElementById('loadingVideo');
+        const initialVideoElem = document.getElementById('initialVideo');
+        
+        // --- AUTH STATE CHECK (unchanged) ---
         auth.onAuthStateChanged((user) => {
             if (!user) {
                 window.location.href = "index.html";
@@ -393,7 +422,6 @@
                 const name = (data && data.username) ? data.username : (user.displayName || "User");
                 updateProfileUI(name, user.email);
             });
-            // Show left sidebar toggle and hide brand logo (as per index.html)
             document.getElementById('leftSidebarContainer').classList.remove('hidden');
             document.getElementById('brandLogo').classList.add('hidden');
             document.getElementById('logoutBtn').classList.remove('hidden');
@@ -419,17 +447,8 @@
             }
         }
 
-        function addIng() {
-            const input = document.getElementById('ingInput');
-            if (input.value.trim()) { ingredients.push(input.value.trim()); input.value = ''; renderList(); }
-        }
-        function editIng(index) {
-            const newValue = prompt("Edit ingredient:", ingredients[index]);
-            if (newValue !== null && newValue.trim() !== "") {
-                ingredients[index] = newValue.trim();
-                renderList();
-            }
-        }
+        function addIng() { const input = document.getElementById('ingInput'); if (input.value.trim()) { ingredients.push(input.value.trim()); input.value = ''; renderList(); } }
+        function editIng(index) { const newValue = prompt("Edit ingredient:", ingredients[index]); if (newValue !== null && newValue.trim() !== "") { ingredients[index] = newValue.trim(); renderList(); } }
         function handleKey(e) { if (e.key === "Enter") addIng(); }
         function renderList() {
             document.getElementById('ingList').innerHTML = ingredients.map((ing, i) => `
@@ -555,7 +574,7 @@
             return div.innerHTML;
         }
 
-        // --- SIDEBAR LOGIC ---
+        // --- SIDEBAR LOGIC (unchanged) ---
         const sidebar = document.getElementById('sidebar');
         const userSidebar = document.getElementById('userSidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -581,7 +600,7 @@
             auth.signOut().then(() => window.location.href = 'index.html');
         });
 
-        // --- COOK BUTTON LOGIC WITH PROPER VIDEO SWAPPING ---
+        // --- COOK BUTTON LOGIC (image → video transition, now initial video) ---
         document.getElementById('cookBtn').onclick = async () => {
             if (!currentUser) {
                 alert("Please log in first!");
@@ -590,38 +609,31 @@
             if (ingredients.length === 0) return alert("Add ingredients first!");
             
             const btn = document.getElementById('cookBtn');
-            const resultsArea = document.getElementById('resultsArea');
-            const loadingScreen = document.getElementById('loadingScreen');
-            const resultsScreen = document.getElementById('resultsScreen');
-            const loadingVideo = document.getElementById('loadingVideo');
             const mealsContainer = document.getElementById('mealsContainer');
 
             btn.innerText = "CHEF IS BRAINSTORMING..."; 
             btn.disabled = true;
             
-            // Show results area
-            resultsArea.classList.remove('opacity-0', 'pointer-events-none');
+            // SWAP: hide initial video container, show loading video container
+            initialVideoContainer.classList.add('hidden');
+            loadingScreenDiv.classList.remove('hidden');
+            resultsScreenDiv.classList.add('hidden');
             
-            // Hide results screen, show loading screen with video
-            resultsScreen.classList.add('hidden');
-            loadingScreen.classList.remove('hidden');
-            
-            // Start video playback
+            // start loading video
             loadingVideo.currentTime = 0;
-            loadingVideo.play().catch(e => console.log("Video autoplay prevented:", e));
+            await loadingVideo.play().catch(e => console.log("Video autoplay prevented:", e));
 
             try {
                 const res = await callAI(`I have: ${ingredients.join(", ")}. Suggest 3-8 Filipino-style meals. Return ONLY JSON array: [{"name": "Name", "time": "X mins"}]`);
                 const meals = JSON.parse(res.replace(/```json|```/g, "").trim());
                 
-                // Stop video
+                // pause loading video
                 loadingVideo.pause();
                 
-                // COMPLETELY REMOVE loading screen and SHOW results screen in the exact same position
-                loadingScreen.classList.add('hidden');
-                resultsScreen.classList.remove('hidden');
+                // hide loading screen, show results screen
+                loadingScreenDiv.classList.add('hidden');
+                resultsScreenDiv.classList.remove('hidden');
                 
-                // Populate meals
                 mealsContainer.innerHTML = meals.map(m => `
                     <div onclick="openMealOverview('${escapeHtml(m.name)}')" class="meal-card flex items-center h-[100px] border border-green-200 shadow-sm animate-fade-in-down rounded-md px-8">
                         <div class="flex-grow"><h3 class="text-xl font-bold uppercase">${escapeHtml(m.name)}</h3><p class="text-[11px] font-bold text-gray-500 uppercase mt-1 tracking-widest">~ ${escapeHtml(m.time)}</p></div>
@@ -630,8 +642,8 @@
             } catch (error) { 
                 console.error(error);
                 loadingVideo.pause();
-                loadingScreen.classList.add('hidden');
-                resultsScreen.classList.remove('hidden');
+                loadingScreenDiv.classList.add('hidden');
+                resultsScreenDiv.classList.remove('hidden');
                 mealsContainer.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-700 font-semibold">⚠️ AI service error. Please try again.</div>';
                 alert("AI Error. Try again."); 
             } finally { 
@@ -640,7 +652,14 @@
             }
         };
 
+        // initial load: ensure only initial video container visible, others hidden
         window.onload = () => {
+            initialVideoContainer.classList.remove('hidden');
+            loadingScreenDiv.classList.add('hidden');
+            resultsScreenDiv.classList.add('hidden');
+            // Ensure initial video plays (browser may require user interaction, but autoplay is set)
+            if (initialVideoElem) initialVideoElem.play().catch(e => console.log("Initial video autoplay prevented, but will play when page is active."));
+            
             const urlParams = new URLSearchParams(window.location.search);
             const mealToOpen = urlParams.get('open');
             if (mealToOpen) {
