@@ -20,7 +20,7 @@
             animation: fadeInDown 1.2s ease-out forwards;
         }
 
-        /* 2. Video Container Styling (from working version) */
+        /* 2. Video Container Styling */
         .video-container {
             width: 100%;
             min-height: 400px;
@@ -55,7 +55,15 @@
             height: 400px;
             width: auto;
             object-fit: contain;
-            mix-blend-mode: multiply;   /* removes white background */
+            mix-blend-mode: multiply;
+        }
+
+        /* Logo Blending for Sidebar */
+        .sidebar-logo {
+            height: 50px; /* Adjust height as needed */
+            width: auto;
+            mix-blend-mode: multiply;
+            display: block;
         }
 
         body { 
@@ -66,19 +74,15 @@
 </head>
 <body class="bg-[#f0fff4] font-sans antialiased text-gray-900">
 
-    <!-- Left Video Container -->
     <div class="video-container video-pos-left">
         <video id="coletteVid" muted playsinline>
             <source src="colette.mp4" type="video/mp4">
-            Your browser does not support the video tag.
         </video>
     </div>
 
-    <!-- Right Video Container -->
     <div class="video-container video-pos-right">
         <video id="linguiniVid" muted playsinline>
             <source src="linguini.mp4" type="video/mp4">
-            Your browser does not support the video tag.
         </video>
     </div>
 
@@ -109,7 +113,7 @@
 
         <main class="flex-grow flex items-center justify-center animate-on-load">
             <div class="text-center p-8">
-                <h1 class="text-7xl font-bold mb-4 tracking-tight text-gray-800">FridgeWise</h1>
+                <h1 class="text-7xl font-bold mb-4 tracking-tight text-gray-800 uppercase italic">FridgeWise</h1>
                 <p class="text-xl text-gray-700 font-medium max-w-lg mx-auto">
                     Your reliable companion for any cooking suggestions!
                 </p>
@@ -134,11 +138,11 @@
         </main>
     </div>
 
-    <!-- Left Sidebar (Full Navigation) -->
     <div id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out z-[60]">
         <div class="p-8">
             <div class="flex items-center justify-between mb-10">
-                <h2 class="text-2xl font-bold text-green-800">FridgeWise</h2>
+                <img src="FridgeWise.png" alt="FridgeWise Logo" class="sidebar-logo">
+                
                 <button id="sidebarClose" class="text-gray-400 hover:text-red-500">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -146,47 +150,33 @@
                 </button>
             </div>
             <nav class="space-y-4">
-                <a href="index.html" class="flex items-center py-3 px-4 rounded-xl bg-green-50 text-green-900 border-l-4 border-green-600 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> 
-                    Home
+                <a href="index.html" class="flex items-center py-3 px-4 rounded-xl bg-green-50 text-green-900 border-l-4 border-green-600 font-semibold">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> Home
                 </a>
-
                 <a href="maindashboard.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> 
-                    Main Dashboard
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> Main Dashboard
                 </a>
-
                 <a href="secondarydashboard.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg> 
-                    Second Dashboard
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg> Second Dashboard
                 </a>
-
                 <div class="my-4 border-t border-gray-100"></div>
-
                 <a href="cookinghistory.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Cooking History
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Cooking History
                 </a>
-
                 <a href="favoritemeal.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> 
-                    Favorite Recipes
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg> Favorite Recipes
                 </a>
-
-                <!-- About Us link -->
                 <a href="aboutus.html" class="flex items-center py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-900 transition-colors font-semibold">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    About Us
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> About Us
                 </a>
             </nav>
         </div>
     </div>
 
-    <!-- Right Sidebar (User Profile) -->
     <div id="userSidebar" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[60] border-l border-gray-100">
         <div class="p-8 flex flex-col h-full">
             <div class="flex items-center justify-between mb-8">
-                <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tighter italic">Profile</h2>
+                <h2 class="text-xl font-bold text-gray-800 uppercase italic tracking-tighter">Profile</h2>
                 <button id="userSidebarClose" class="text-gray-400 hover:text-red-500 transition-colors">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -202,18 +192,13 @@
             <nav class="space-y-2">
                 <a href="accountdetails.html" class="flex items-center justify-between w-full p-4 rounded-xl text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-all group border border-transparent hover:border-blue-100">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+                        <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         <span class="font-bold text-sm uppercase tracking-tight">Account Details</span>
                     </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </a>
             </nav>
-            <button id="logoutBtn" class="hidden w-full mt-auto bg-red-50 text-red-600 font-bold py-4 rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
+            <button id="logoutBtn" class="hidden w-full mt-auto bg-red-50 text-red-600 font-bold py-4 rounded-xl hover:bg-red-100 flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
                 LOGOUT
             </button>
         </div>
@@ -222,7 +207,6 @@
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
 
     <script>
-        // ---------- Firebase Configuration ----------
         const firebaseConfig = {
             apiKey: "AIzaSyAZl_HJXjKdycYfYfb4rH7Pue6vwJ9G-KM",
             authDomain: "fridgewise-37166.firebaseapp.com",
@@ -239,31 +223,22 @@
             if (!user) return;
             db.ref('users/' + user.uid).once('value').then((snapshot) => {
                 const userData = snapshot.val();
-                let displayName = "User";
-                let userEmail = user.email || "";
-                if (userData) {
-                    displayName = userData.username || userData.name || userData.displayName || (user.email ? user.email.split('@')[0] : "User");
-                }
-                updateProfileUI(displayName, userEmail);
+                let displayName = userData?.username || userData?.name || user.email.split('@')[0] || "User";
+                updateProfileUI(displayName, user.email);
             });
         }
 
-        // ---------- Auth State ----------
         auth.onAuthStateChanged((user) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const isVerified = urlParams.get('status') === 'verified' || user;
-            if (isVerified && user) {
+            if (user) {
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('verifiedSection').classList.remove('hidden');
                 document.getElementById('leftSidebarContainer').classList.remove('hidden');
-                document.getElementById('brandLogo').classList.add('hidden');
                 document.getElementById('logoutBtn').classList.remove('hidden');
                 fetchAndDisplayUserProfile(user);
             } else {
                 document.getElementById('loginSection').classList.remove('hidden');
                 document.getElementById('verifiedSection').classList.add('hidden');
                 document.getElementById('leftSidebarContainer').classList.add('hidden');
-                document.getElementById('brandLogo').classList.remove('hidden');
                 document.getElementById('logoutBtn').classList.add('hidden');
                 updateProfileUI("Guest", "Please sign in");
             }
@@ -272,11 +247,9 @@
         function updateProfileUI(name, email) {
             document.getElementById('userNameDisplay').textContent = name;
             document.getElementById('userEmailDisplay').textContent = email;
-            const initial = name.charAt(0).toUpperCase();
-            document.getElementById('userInitial').textContent = initial;
+            document.getElementById('userInitial').textContent = name.charAt(0).toUpperCase();
         }
 
-        // ---------- Sidebar Mechanics ----------
         const sidebar = document.getElementById('sidebar');
         const userSidebar = document.getElementById('userSidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -293,8 +266,6 @@
         });
 
         document.getElementById('userMenuToggle').addEventListener('click', () => {
-            const currentUser = auth.currentUser;
-            if (currentUser) fetchAndDisplayUserProfile(currentUser);
             userSidebar.classList.remove('translate-x-full');
             overlay.classList.add('opacity-100', 'pointer-events-auto');
         });
@@ -307,21 +278,13 @@
             auth.signOut().then(() => { window.location.href = 'index.html'; });
         });
 
-        // ---------- Video Autoplay with Delay ----------
         window.addEventListener('load', () => {
-            const colette = document.getElementById('coletteVid');
-            const linguini = document.getElementById('linguiniVid');
-            
             setTimeout(() => {
-                if (colette) {
-                    colette.loop = false;      // ensure no loop
-                    colette.play().catch(e => console.log("Autoplay blocked:", e));
-                }
-                if (linguini) {
-                    linguini.loop = false;
-                    linguini.play().catch(e => console.log("Autoplay blocked:", e));
-                }
-            }, 3000); // 3 second delay – adjust as needed
+                ['coletteVid', 'linguiniVid'].forEach(id => {
+                    const vid = document.getElementById(id);
+                    if (vid) vid.play().catch(e => console.log("Blocked:", e));
+                });
+            }, 3000);
         });
     </script>
 </body>
