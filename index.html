@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>FridgeWise</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -20,7 +20,7 @@
             animation: fadeInDown 1.2s ease-out forwards;
         }
 
-        /* 2. Video Container Styling */
+        /* 2. Video Container Styling - Desktop Default */
         .video-container {
             width: 100%;
             min-height: 400px;
@@ -58,12 +58,63 @@
             mix-blend-mode: multiply;
         }
 
+        /* Mobile Specific Styles (max-width: 420px) */
+        @media (max-width: 420px) {
+            .video-container {
+                min-height: auto;
+                top: auto;
+                transform: none;
+                position: fixed;
+                overflow: visible;
+                padding-right: 0;
+            }
+            
+            /* Colette (Left Video) - Mobile Adjustments */
+            .video-pos-left {
+                left: -3px;
+                width: auto;
+                justify-content: flex-start;
+                padding-left: 0;
+                top: 57%;
+                transform: translateY(-50%);
+            }
+            
+            .video-pos-left video {
+                height: 185px;
+                width: auto;
+                transform: scale(0.98);
+                transform-origin: left center;
+            }
+            
+            /* Linguini (Right Video) - Mobile Adjustments */
+            .video-pos-right {
+                right: -1px;
+                width: auto;
+                justify-content: flex-end;
+                top: 57%;
+                transform: translateY(-50%);
+            }
+            
+            .video-pos-right video {
+                height: 170px;
+                width: auto;
+                transform: scale(1);
+                transform-origin: right center;
+            }
+        }
+
         /* Logo Blending for Sidebar */
         .sidebar-logo {
-            height: 50px; /* Adjust height as needed */
+            height: 50px;
             width: auto;
             mix-blend-mode: multiply;
             display: block;
+        }
+
+        /* Custom button padding for exact 13.5px horizontal padding */
+        .btn-start-cooking {
+            padding-left: 13.5px;
+            padding-right: 13.5px;
         }
 
         body { 
@@ -130,8 +181,8 @@
                 </div>
 
                 <div id="verifiedSection" class="mt-12 hidden">
-                    <a href="maindashboard.html" class="inline-block px-20 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all duration-200 uppercase tracking-widest shadow-lg">
-                        Start Cooking
+                    <a href="maindashboard.html" class="inline-block btn-start-cooking py-3 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 transition-all duration-200 uppercase tracking-wide shadow-md">
+                        START COOKING
                     </a>
                 </div>
             </div>
@@ -282,7 +333,9 @@
             setTimeout(() => {
                 ['coletteVid', 'linguiniVid'].forEach(id => {
                     const vid = document.getElementById(id);
-                    if (vid) vid.play().catch(e => console.log("Blocked:", e));
+                    if (vid) {
+                        vid.play().catch(e => console.log("Video autoplay prevented:", e));
+                    }
                 });
             }, 3000);
         });

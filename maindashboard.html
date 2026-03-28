@@ -113,6 +113,7 @@
             position: relative;
         }
         
+        /* Desktop/Laptop Default (Original) */
         #initialVideo {
             max-width: 90%;
             max-height: 380px;
@@ -123,6 +124,15 @@
             transform: translate(62px, -282px) scale(2.73);
             transform-origin: center;
             will-change: transform;
+        }
+        
+        /* Mobile Specific Styles (max-width: 420px) */
+        @media (max-width: 420px) {
+            #initialVideo {
+                transform: translate(7px, -241px) scale(1.07);
+                max-width: 86%;
+                max-height: none;
+            }
         }
         
         /* Content wrapper for dynamic swapping */
@@ -407,7 +417,7 @@
 
         // --- GLOBALS ---
         let ingredients = [];
-        const API_KEY = "AIzaSyDTsbE1g9upBJRode1kdAhlxI9YOI2CtpQ";
+        const API_KEY = "AIzaSyBGSuDQe-0OxRprocYS9gbgQ1sSvsDNqFg";
         let currentMealName = "";
         let currentUser = null;
 
