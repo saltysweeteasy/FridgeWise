@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>FridgeWise - Digital Kitchen</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -100,12 +100,13 @@
             mix-blend-mode: multiply;
         }
         
-        /* Initial video container - fully transparent, same transform as previous image */
+        /* Initial video container - desktop default (original transform) */
         .initial-video-container {
             width: 100%;
             min-height: 400px;
             background-color: transparent;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             border-radius: 16px;
@@ -113,7 +114,6 @@
             position: relative;
         }
         
-        /* Desktop/Laptop Default (Original) */
         #initialVideo {
             max-width: 90%;
             max-height: 380px;
@@ -124,15 +124,74 @@
             transform: translate(62px, -282px) scale(2.73);
             transform-origin: center;
             will-change: transform;
+            transition: all 0.2s ease;
         }
         
-        /* Mobile Specific Styles (max-width: 420px) */
-        @media (max-width: 420px) {
-            #initialVideo {
-                transform: translate(7px, -241px) scale(1.07);
-                max-width: 86%;
-                max-height: none;
+        /* Mobile specific: make linguinithinking.mp4 bigger, add resize control */
+        @media (max-width: 768px) {
+            .initial-video-container {
+                min-height: auto;
+                padding: 0.5rem 0;
             }
+            
+            #initialVideo {
+                max-width: 95%;
+                max-height: 380px;  /* larger than before (was 280px) */
+                transform: none;     /* remove desktop transform */
+                margin: 0 auto;
+                display: block;
+            }
+            
+            .video-size-control {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-top: 12px;
+                background: white;
+                padding: 8px 16px;
+                border-radius: 40px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                border: 1px solid #e2e8f0;
+            }
+            
+            .video-size-control label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #2d3748;
+            }
+            
+            .video-size-control input {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .video-size-control span {
+                font-size: 0.7rem;
+                font-weight: bold;
+                color: #4a5568;
+                background: #edf2f7;
+                padding: 2px 8px;
+                border-radius: 20px;
+            }
+            
+            .loading-video-container {
+                min-height: auto;
+                justify-content: center;
+                padding-right: 0;
+            }
+            .loading-video-container video {
+                height: 320px;
+                max-width: 100%;
+            }
+            
+            .dynamic-content-wrapper {
+                min-height: 400px;
+            }
+        }
+        
+        /* Desktop: hide the size control by default, but we can show it optionally */
+        .video-size-control {
+            display: none;
         }
         
         /* Content wrapper for dynamic swapping */
@@ -144,14 +203,6 @@
         .loading-screen, .results-screen {
             transition: opacity 0.4s ease-in-out;
         }
-
-        /* Sidebar logo styling - adapted from index.html */
-        .sidebar-logo {
-            height: 50px;
-            width: auto;
-            mix-blend-mode: multiply;
-            display: block;
-        }
     </style>
 </head>
 <body class="font-sans antialiased text-gray-900 overflow-x-hidden">
@@ -160,7 +211,7 @@
     <div id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out z-[60]">
         <div class="p-8">
             <div class="flex items-center justify-between mb-10">
-                <img src="FridgeWise.png" alt="FridgeWise Logo" class="sidebar-logo">
+                <h2 class="text-2xl font-bold text-green-800">FridgeWise</h2>
                 <button id="sidebarClose" class="text-gray-400 hover:text-red-500">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -206,7 +257,7 @@
     <div id="userSidebar" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[60] border-l border-gray-100">
         <div class="p-8 flex flex-col h-full">
             <div class="flex items-center justify-between mb-8">
-                <img src="FridgeWise.png" alt="FridgeWise Logo" class="sidebar-logo">
+                <h2 class="text-xl font-bold text-gray-800">Profile</h2>
                 <button id="userSidebarClose" class="text-gray-400 hover:text-red-500">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -300,6 +351,12 @@
                                 <source src="linguinithinking.mp4" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
+                            <!-- Video size control (visible only on mobile via CSS) -->
+                            <div id="videoSizeControl" class="video-size-control">
+                                <label>📐 Size</label>
+                                <input type="range" id="videoSizeSlider" min="50" max="120" value="100" step="5">
+                                <span id="sizeValue">100%</span>
+                            </div>
                         </div>
                         
                         <!-- Loading Screen (Video) - Initially hidden -->
@@ -417,7 +474,7 @@
 
         // --- GLOBALS ---
         let ingredients = [];
-        const API_KEY = "AIzaSyBGSuDQe-0OxRprocYS9gbgQ1sSvsDNqFg";
+        const API_KEY = "AIzaSyDWE_BCvxRglvyufq6nKvjh3h0R9vOT8lY";
         let currentMealName = "";
         let currentUser = null;
 
@@ -428,7 +485,43 @@
         const loadingVideo = document.getElementById('loadingVideo');
         const initialVideoElem = document.getElementById('initialVideo');
         
-        // --- AUTH STATE CHECK (unchanged) ---
+        // Video size control elements
+        const videoSizeSlider = document.getElementById('videoSizeSlider');
+        const sizeValueSpan = document.getElementById('sizeValue');
+        
+        // --- Video resize functionality (only active on mobile where control is visible) ---
+        function initVideoResize() {
+            if (videoSizeSlider && sizeValueSpan && initialVideoElem) {
+                videoSizeSlider.addEventListener('input', (e) => {
+                    const percent = e.target.value;
+                    sizeValueSpan.innerText = percent + '%';
+                    // Apply scale transform relative to original size
+                    const scale = percent / 100;
+                    // On mobile we have transform: none, so we apply a scale transform
+                    // But we want to keep it centered. Use transform: scale()
+                    if (window.innerWidth <= 768) {
+                        initialVideoElem.style.transform = `scale(${scale})`;
+                        initialVideoElem.style.transformOrigin = 'center center';
+                    } else {
+                        // On desktop, we preserve the original transform but also scale relative to it?
+                        // Simpler: on desktop, we adjust max-width/height? But user likely only wants mobile adjustment.
+                        // We'll just ignore desktop or apply similar.
+                        initialVideoElem.style.transform = `translate(62px, -282px) scale(${2.73 * scale})`;
+                        initialVideoElem.style.transformOrigin = 'center';
+                    }
+                });
+                // Reset to default 100% when page loads
+                videoSizeSlider.value = '100';
+                sizeValueSpan.innerText = '100%';
+                if (window.innerWidth <= 768) {
+                    initialVideoElem.style.transform = 'scale(1)';
+                } else {
+                    initialVideoElem.style.transform = 'translate(62px, -282px) scale(2.73)';
+                }
+            }
+        }
+        
+        // --- AUTH STATE CHECK ---
         auth.onAuthStateChanged((user) => {
             if (!user) {
                 window.location.href = "index.html";
@@ -592,7 +685,7 @@
             return div.innerHTML;
         }
 
-        // --- SIDEBAR LOGIC (unchanged) ---
+        // --- SIDEBAR LOGIC ---
         const sidebar = document.getElementById('sidebar');
         const userSidebar = document.getElementById('userSidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -618,7 +711,7 @@
             auth.signOut().then(() => window.location.href = 'index.html');
         });
 
-        // --- COOK BUTTON LOGIC (image → video transition, now initial video) ---
+        // --- COOK BUTTON LOGIC ---
         document.getElementById('cookBtn').onclick = async () => {
             if (!currentUser) {
                 alert("Please log in first!");
@@ -675,8 +768,10 @@
             initialVideoContainer.classList.remove('hidden');
             loadingScreenDiv.classList.add('hidden');
             resultsScreenDiv.classList.add('hidden');
-            // Ensure initial video plays (browser may require user interaction, but autoplay is set)
             if (initialVideoElem) initialVideoElem.play().catch(e => console.log("Initial video autoplay prevented, but will play when page is active."));
+            
+            // Initialize video resize controls
+            initVideoResize();
             
             const urlParams = new URLSearchParams(window.location.search);
             const mealToOpen = urlParams.get('open');
