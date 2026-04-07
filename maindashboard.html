@@ -136,8 +136,8 @@
             
             #initialVideo {
                 max-width: 95%;
-                max-height: 380px;  /* larger than before (was 280px) */
-                transform: none;     /* remove desktop transform */
+                max-height: 380px;
+                transform: none;
                 margin: 0 auto;
                 display: block;
             }
@@ -202,6 +202,39 @@
         
         .loading-screen, .results-screen {
             transition: opacity 0.4s ease-in-out;
+        }
+        
+        /* New style for centered meal overview columns (no image column) */
+        .meal-overview-centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .meal-overview-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+        @media (min-width: 768px) {
+            .meal-overview-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 3rem;
+            }
+        }
+        .meal-description-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2f0e6;
+        }
+        .meal-title-centered {
+            text-align: center;
+            margin-bottom: 1.5rem;
         }
     </style>
 </head>
@@ -345,13 +378,12 @@
                     <h2 class="text-3xl font-bold tracking-tight text-gray-800 uppercase">Possible Meals</h2>
                     
                     <div id="dynamicContentWrapper" class="dynamic-content-wrapper">
-                        <!-- INITIAL VIDEO CONTAINER (linguini_thinking.mp4) - visible on page load -->
+                        <!-- INITIAL VIDEO CONTAINER -->
                         <div id="initialVideoContainer" class="initial-video-container">
                             <video id="initialVideo" autoplay loop muted playsinline>
                                 <source src="linguinithinking.mp4" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
-                            <!-- Video size control (visible only on mobile via CSS) -->
                             <div id="videoSizeControl" class="video-size-control">
                                 <label>📐 Size</label>
                                 <input type="range" id="videoSizeSlider" min="50" max="120" value="100" step="5">
@@ -359,7 +391,7 @@
                             </div>
                         </div>
                         
-                        <!-- Loading Screen (Video) - Initially hidden -->
+                        <!-- Loading Screen (Video) -->
                         <div id="loadingScreen" class="loading-screen hidden">
                             <div class="loading-video-container">
                                 <video id="loadingVideo" loop muted playsinline>
@@ -369,7 +401,7 @@
                             </div>
                         </div>
                         
-                        <!-- Results Screen (Meals) - Initially hidden -->
+                        <!-- Results Screen (Meals) -->
                         <div id="resultsScreen" class="results-screen hidden">
                             <div id="mealsContainer" class="space-y-4"></div>
                         </div>
@@ -379,7 +411,7 @@
         </main>
     </div>
 
-    <!-- Meal Overview (unchanged) -->
+    <!-- Meal Overview (Image removed, centered layout) -->
     <div id="mealOverview" class="hidden flex flex-col min-h-screen">
         <header class="bg-[#dcfce7] border-b border-green-200 shadow-sm sticky top-0 z-50">
             <nav class="max-w-[1440px] mx-auto px-6 py-3 flex items-center justify-between">
@@ -391,64 +423,62 @@
             </nav>
         </header>
 
-        <main class="flex-grow max-w-[1200px] mx-auto py-12 px-6 w-full">
-            <div class="flex items-center space-x-4 mb-8">
-                <h2 class="text-4xl font-bold uppercase tracking-tight">Meal Overview</h2>
-                <button id="favBtn" onclick="toggleFavorite()" class="flex items-center hover:scale-105 transition-transform">
-                    <span id="favStar" class="text-3xl" style="color: #9ca3af;">&#9734;</span>
-                    <span id="favText" class="text-sm font-bold text-gray-600 ml-2">(Mark as favorite)</span>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                <div class="text-center">
-                    <div class="w-full aspect-square bg-white border-4 border-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center">
-                        <img id="overviewImg" src="" class="w-full h-full object-cover hidden" alt="Meal Visual">
-                        <div id="imageLoader" class="text-gray-400 font-bold uppercase tracking-widest text-xs text-center p-4">Generating Visual...</div>
-                    </div>
-                    <p id="viewMealName" class="mt-4 text-xl font-bold uppercase tracking-widest text-gray-800"></p>
+        <main class="flex-grow max-w-[1100px] mx-auto py-12 px-6 w-full">
+            <div class="meal-overview-centered">
+                <!-- Title and favorite button centered -->
+                <div class="meal-title-centered flex items-center justify-center space-x-4 mb-8 flex-wrap">
+                    <h2 id="overviewMealName" class="text-4xl font-bold uppercase tracking-tight text-gray-800">Meal Name</h2>
+                    <button id="favBtnOverview" onclick="toggleFavorite()" class="flex items-center hover:scale-105 transition-transform">
+                        <span id="favStar" class="text-3xl" style="color: #9ca3af;">&#9734;</span>
+                        <span id="favText" class="text-sm font-bold text-gray-600 ml-2">(Mark as favorite)</span>
+                    </button>
                 </div>
 
-                <div class="p-2">
-                    <p id="mealDesc" class="text-gray-700 font-medium leading-relaxed italic"></p>
-                </div>
-
-                <div class="space-y-4">
-                    <div id="accordionGroup" class="space-y-4">
-                        <div class="category-box">
-                            <button onclick="toggleAccordion(this, 'Ingredients')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Ingredients <span>+</span></button>
-                            <div class="accordion-content px-4 text-sm leading-relaxed"></div>
-                        </div>
-                        <div class="category-box">
-                            <button onclick="toggleAccordion(this, 'Nutritional Facts')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Nutritional Facts <span>+</span></button>
-                            <div class="accordion-content px-4 text-sm leading-relaxed"></div>
-                        </div>
-                        <div class="category-box">
-                            <button onclick="toggleAccordion(this, 'Step by Step Process')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Step by Step Process <span>+</span></button>
-                            <div class="accordion-content px-4 text-sm leading-relaxed"></div>
-                        </div>
-                        <div class="category-box">
-                            <button onclick="toggleAccordion(this, 'Nutritional Analysis')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Nutritional Analysis <span>+</span></button>
-                            <div class="accordion-content px-4 text-sm leading-relaxed"></div>
-                        </div>
-                        <div class="category-box">
-                            <button onclick="toggleAccordion(this, 'Add-ons Suggestion')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Add-ons Suggestion <span>+</span></button>
-                            <div class="accordion-content px-4 text-sm leading-relaxed"></div>
-                        </div>
+                <div class="meal-overview-grid">
+                    <!-- Description Column (moved to left or right, both centered) -->
+                    <div class="meal-description-card">
+                        <h3 class="text-lg font-bold uppercase tracking-wider text-green-700 mb-3">🍽️ Chef's Note</h3>
+                        <p id="mealDesc" class="text-gray-700 font-medium leading-relaxed italic min-h-[120px]"></p>
                     </div>
 
-                    <div class="pt-6 border-t border-gray-100 text-center">
-                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Share to</p>
-                        <div class="flex justify-center gap-4">
-                            <button onclick="shareMeal('link')" class="share-btn bg-gray-500 hover:bg-gray-600" title="Copy Recipe Link">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                            </button>
-                            <button onclick="shareMeal('messenger')" class="share-btn bg-[#0084FF] hover:bg-[#0073e6]" title="Share on Messenger">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 4.973 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.08-2.268c1.12.312 2.304.48 3.528.48 6.627 0 12-4.973 12-11.111C24 4.973 18.627 0 12 0zm3.84 12.656l-2.4-2.56-4.64 2.56 5.12-5.44 2.4 2.56 4.64-2.56-5.12 5.44z"/></svg>
-                            </button>
-                            <button onclick="shareMeal('instagram')" class="share-btn bg-[#E4405F] hover:bg-[#d62e4c]" title="Share on Instagram">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.132 5.775.072 7.053.012 8.333 0 8.74 0 12s.012 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.012 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.012-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07s-3.585-.015-4.85-.074c-1.17-.061-1.805-.256-2.227-.421-.562-.224-.96-.479-1.382-.899-.419-.419-.679-.824-.896-1.38-.164-.42-.36-1.065-.413-2.235-.057-1.274-.07-1.649-.07-4.859s.015-3.585.074-4.85c.061-1.17.256-1.805.421-2.227.224-.562.479-.96.899-1.382.419-.419.824-.679 1.38-.896.42-.164 1.065-.36 2.235-.413 1.274-.057 1.649-.07 4.859-.07zM12 5.832a6.168 6.168 0 100 12.336 6.168 6.168 0 000-12.336zm0 10.176a4.008 4.008 0 110-8.016 4.008 4.008 0 010 8.016zm6.406-11.845a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>
-                            </button>
+                    <!-- Accordion Column (Nutrition, Steps, Add-ons) -->
+                    <div class="space-y-4">
+                        <div id="accordionGroup" class="space-y-4">
+                            <div class="category-box">
+                                <button onclick="toggleAccordion(this, 'Ingredients')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Ingredients <span>+</span></button>
+                                <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                            </div>
+                            <div class="category-box">
+                                <button onclick="toggleAccordion(this, 'Nutritional Facts')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Nutritional Facts <span>+</span></button>
+                                <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                            </div>
+                            <div class="category-box">
+                                <button onclick="toggleAccordion(this, 'Step by Step Process')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Step by Step Process <span>+</span></button>
+                                <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                            </div>
+                            <div class="category-box">
+                                <button onclick="toggleAccordion(this, 'Nutritional Analysis')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Nutritional Analysis <span>+</span></button>
+                                <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                            </div>
+                            <div class="category-box">
+                                <button onclick="toggleAccordion(this, 'Add-ons Suggestion')" class="w-full bg-[#dcfce7] p-4 flex justify-between items-center font-bold uppercase tracking-widest text-[#065f46]">Add-ons Suggestion <span>+</span></button>
+                                <div class="accordion-content px-4 text-sm leading-relaxed"></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-gray-100 text-center">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Share to</p>
+                            <div class="flex justify-center gap-4">
+                                <button onclick="shareMeal('link')" class="share-btn bg-gray-500 hover:bg-gray-600" title="Copy Recipe Link">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                </button>
+                                <button onclick="shareMeal('messenger')" class="share-btn bg-[#0084FF] hover:bg-[#0073e6]" title="Share on Messenger">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 4.973 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.08-2.268c1.12.312 2.304.48 3.528.48 6.627 0 12-4.973 12-11.111C24 4.973 18.627 0 12 0zm3.84 12.656l-2.4-2.56-4.64 2.56 5.12-5.44 2.4 2.56 4.64-2.56-5.12 5.44z"/></svg>
+                                </button>
+                                <button onclick="shareMeal('instagram')" class="share-btn bg-[#E4405F] hover:bg-[#d62e4c]" title="Share on Instagram">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.132 5.775.072 7.053.012 8.333 0 8.74 0 12s.012 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.012 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.012-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07s-3.585-.015-4.85-.074c-1.17-.061-1.805-.256-2.227-.421-.562-.224-.96-.479-1.382-.899-.419-.419-.679-.824-.896-1.38-.164-.42-.36-1.065-.413-2.235-.057-1.274-.07-1.649-.07-4.859s.015-3.585.074-4.85c.061-1.17.256-1.805.421-2.227.224-.562.479-.96.899-1.382.419-.419.824-.679 1.38-.896.42-.164 1.065-.36 2.235-.413 1.274-.057 1.649-.07 4.859-.07zM12 5.832a6.168 6.168 0 100 12.336 6.168 6.168 0 000-12.336zm0 10.176a4.008 4.008 0 110-8.016 4.008 4.008 0 010 8.016zm6.406-11.845a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -457,7 +487,7 @@
     </div>
 
     <script>
-        // --- FIREBASE CONFIG (unchanged) ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAZl_HJXjKdycYfYfb4rH7Pue6vwJ9G-KM",
             authDomain: "fridgewise-37166.firebaseapp.com",
@@ -472,45 +502,33 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // --- GLOBALS ---
         let ingredients = [];
-        const API_KEY = "AIzaSyCky6LIlRPK69N--RrioQwYT1Xhs0tTykw";
+        const API_KEY = "AIzaSyDgM-qux49wz_X24jdM8-BChykEAwWBkDc";
         let currentMealName = "";
         let currentUser = null;
 
-        // --- DOM Elements for dynamic containers ---
         const initialVideoContainer = document.getElementById('initialVideoContainer');
         const loadingScreenDiv = document.getElementById('loadingScreen');
         const resultsScreenDiv = document.getElementById('resultsScreen');
         const loadingVideo = document.getElementById('loadingVideo');
         const initialVideoElem = document.getElementById('initialVideo');
-        
-        // Video size control elements
         const videoSizeSlider = document.getElementById('videoSizeSlider');
         const sizeValueSpan = document.getElementById('sizeValue');
         
-        // --- Video resize functionality (only active on mobile where control is visible) ---
         function initVideoResize() {
             if (videoSizeSlider && sizeValueSpan && initialVideoElem) {
                 videoSizeSlider.addEventListener('input', (e) => {
                     const percent = e.target.value;
                     sizeValueSpan.innerText = percent + '%';
-                    // Apply scale transform relative to original size
                     const scale = percent / 100;
-                    // On mobile we have transform: none, so we apply a scale transform
-                    // But we want to keep it centered. Use transform: scale()
                     if (window.innerWidth <= 768) {
                         initialVideoElem.style.transform = `scale(${scale})`;
                         initialVideoElem.style.transformOrigin = 'center center';
                     } else {
-                        // On desktop, we preserve the original transform but also scale relative to it?
-                        // Simpler: on desktop, we adjust max-width/height? But user likely only wants mobile adjustment.
-                        // We'll just ignore desktop or apply similar.
                         initialVideoElem.style.transform = `translate(62px, -282px) scale(${2.73 * scale})`;
                         initialVideoElem.style.transformOrigin = 'center';
                     }
                 });
-                // Reset to default 100% when page loads
                 videoSizeSlider.value = '100';
                 sizeValueSpan.innerText = '100%';
                 if (window.innerWidth <= 768) {
@@ -520,8 +538,7 @@
                 }
             }
         }
-        
-        // --- AUTH STATE CHECK ---
+
         auth.onAuthStateChanged((user) => {
             if (!user) {
                 window.location.href = "index.html";
@@ -579,16 +596,11 @@
             historyRef.set({ name: name, ingredients: ingredients.length > 0 ? ingredients.join(", ") : "None specified", cookedAt: Date.now() });
             document.getElementById('mainDashboard').classList.add('hidden');
             document.getElementById('mealOverview').classList.remove('hidden');
-            document.getElementById('viewMealName').innerText = name;
+            document.getElementById('overviewMealName').innerText = name;
             const mealId = name.replace(/[.#$/[\]]/g, "_");
             database.ref(`users/${currentUser.uid}/favorites/${mealId}`).once('value', s => setStarState(s.exists()));
             document.querySelectorAll('.accordion-content').forEach(el => { el.classList.remove('open'); el.innerHTML = ""; });
             document.querySelectorAll('#accordionGroup span').forEach(s => s.innerText = "+");
-            const img = document.getElementById('overviewImg');
-            const loader = document.getElementById('imageLoader');
-            img.classList.add('hidden'); loader.classList.remove('hidden');
-            img.src = `https://loremflickr.com/600/600/${encodeURIComponent(name)},dish,food/all?lock=${Math.floor(Math.random()*1000)}`;
-            img.onload = () => { img.classList.remove('hidden'); loader.classList.add('hidden'); };
             const descEl = document.getElementById('mealDesc');
             descEl.innerText = "";
             const res = await callAI(`Give a short, appetizing 2-sentence Filipino description for ${name}.`);
@@ -685,66 +697,40 @@
             return div.innerHTML;
         }
 
-        // --- SIDEBAR LOGIC ---
+        // Sidebar
         const sidebar = document.getElementById('sidebar');
         const userSidebar = document.getElementById('userSidebar');
         const overlay = document.getElementById('sidebarOverlay');
-
         function closeAll() {
             sidebar.classList.add('-translate-x-full');
             userSidebar.classList.add('translate-x-full');
             overlay.classList.remove('opacity-100', 'pointer-events-auto');
         }
-
-        document.getElementById('sidebarToggle').onclick = () => {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.add('opacity-100', 'pointer-events-auto');
-        };
-        document.getElementById('userMenuToggle').onclick = () => {
-            userSidebar.classList.remove('translate-x-full');
-            overlay.classList.add('opacity-100', 'pointer-events-auto');
-        };
+        document.getElementById('sidebarToggle').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.add('opacity-100', 'pointer-events-auto'); };
+        document.getElementById('userMenuToggle').onclick = () => { userSidebar.classList.remove('translate-x-full'); overlay.classList.add('opacity-100', 'pointer-events-auto'); };
         document.getElementById('sidebarClose').onclick = closeAll;
         document.getElementById('userSidebarClose').onclick = closeAll;
         overlay.onclick = closeAll;
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            auth.signOut().then(() => window.location.href = 'index.html');
-        });
+        document.getElementById('logoutBtn').addEventListener('click', () => { auth.signOut().then(() => window.location.href = 'index.html'); });
 
-        // --- COOK BUTTON LOGIC ---
+        // Cook button logic
         document.getElementById('cookBtn').onclick = async () => {
-            if (!currentUser) {
-                alert("Please log in first!");
-                return;
-            }
+            if (!currentUser) { alert("Please log in first!"); return; }
             if (ingredients.length === 0) return alert("Add ingredients first!");
-            
             const btn = document.getElementById('cookBtn');
             const mealsContainer = document.getElementById('mealsContainer');
-
-            btn.innerText = "CHEF IS BRAINSTORMING..."; 
-            btn.disabled = true;
-            
-            // SWAP: hide initial video container, show loading video container
+            btn.innerText = "CHEF IS BRAINSTORMING..."; btn.disabled = true;
             initialVideoContainer.classList.add('hidden');
             loadingScreenDiv.classList.remove('hidden');
             resultsScreenDiv.classList.add('hidden');
-            
-            // start loading video
             loadingVideo.currentTime = 0;
             await loadingVideo.play().catch(e => console.log("Video autoplay prevented:", e));
-
             try {
                 const res = await callAI(`I have: ${ingredients.join(", ")}. Suggest 3-8 Filipino-style meals. Return ONLY JSON array: [{"name": "Name", "time": "X mins"}]`);
                 const meals = JSON.parse(res.replace(/```json|```/g, "").trim());
-                
-                // pause loading video
                 loadingVideo.pause();
-                
-                // hide loading screen, show results screen
                 loadingScreenDiv.classList.add('hidden');
                 resultsScreenDiv.classList.remove('hidden');
-                
                 mealsContainer.innerHTML = meals.map(m => `
                     <div onclick="openMealOverview('${escapeHtml(m.name)}')" class="meal-card flex items-center h-[100px] border border-green-200 shadow-sm animate-fade-in-down rounded-md px-8">
                         <div class="flex-grow"><h3 class="text-xl font-bold uppercase">${escapeHtml(m.name)}</h3><p class="text-[11px] font-bold text-gray-500 uppercase mt-1 tracking-widest">~ ${escapeHtml(m.time)}</p></div>
@@ -757,28 +743,18 @@
                 resultsScreenDiv.classList.remove('hidden');
                 mealsContainer.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-700 font-semibold">⚠️ AI service error. Please try again.</div>';
                 alert("AI Error. Try again."); 
-            } finally { 
-                btn.innerText = "START COOKING"; 
-                btn.disabled = false; 
-            }
+            } finally { btn.innerText = "START COOKING"; btn.disabled = false; }
         };
 
-        // initial load: ensure only initial video container visible, others hidden
         window.onload = () => {
             initialVideoContainer.classList.remove('hidden');
             loadingScreenDiv.classList.add('hidden');
             resultsScreenDiv.classList.add('hidden');
-            if (initialVideoElem) initialVideoElem.play().catch(e => console.log("Initial video autoplay prevented, but will play when page is active."));
-            
-            // Initialize video resize controls
+            if (initialVideoElem) initialVideoElem.play().catch(e => console.log("Initial video autoplay prevented"));
             initVideoResize();
-            
             const urlParams = new URLSearchParams(window.location.search);
             const mealToOpen = urlParams.get('open');
-            if (mealToOpen) {
-                const decodedMeal = decodeURIComponent(mealToOpen);
-                openMealOverview(decodedMeal);
-            }
+            if (mealToOpen) openMealOverview(decodeURIComponent(mealToOpen));
         };
     </script>
 </body>
