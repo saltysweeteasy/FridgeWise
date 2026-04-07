@@ -58,7 +58,7 @@
             mix-blend-mode: multiply;
         }
 
-        /* Mobile Specific Styles - FIX: Prevent scrolling, keep videos fixed */
+        /* Mobile Specific Styles (max-width: 480px) - Videos positioned slightly lower */
         @media (max-width: 480px) {
             /* Lock the entire page to prevent any scrolling */
             html, body {
@@ -74,18 +74,18 @@
             
             .video-container {
                 min-height: auto;
-                top: 50%;
-                transform: translateY(-50%);
                 position: fixed;
                 overflow: visible;
                 padding-right: 0;
-                /* Ensure they don't shift on any fake scroll */
+                /* Move videos down by changing top position from 50% to 60% */
+                top: 60%;
+                transform: translateY(-50%);
                 will-change: transform;
             }
             
             /* Colette (Left Video) - Mobile Adjustments */
             .video-pos-left {
-                left: -3px;
+                left: -20px;
                 width: auto;
                 justify-content: flex-start;
                 padding-left: 0;
@@ -119,11 +119,9 @@
             }
             
             main {
-                overflow-y: auto; /* Allow internal content to be scrollable if needed? But we want no scroll, so set to hidden */
                 overflow-y: hidden;
             }
             
-            /* Extra safety: no margin/padding causing scroll */
             body {
                 margin: 0;
                 padding: 0;
@@ -400,10 +398,6 @@
         // Additional safety: on mobile, prevent any touchmove that could cause scroll
         if (window.innerWidth <= 480) {
             document.body.addEventListener('touchmove', function(e) {
-                // Prevent scrolling only if the target is not a sidebar or interactive element that needs scrolling
-                // For simplicity, we block all touchmove on body because we want no scrolling.
-                // But sidebars should be scrollable if their content overflows? However sidebars have their own overflow handling.
-                // To allow sidebar scrolling, we need to check if the touch target is inside sidebar or userSidebar.
                 let target = e.target;
                 let isSidebar = target.closest('#sidebar') || target.closest('#userSidebar');
                 if (!isSidebar) {
